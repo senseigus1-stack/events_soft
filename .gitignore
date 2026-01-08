@@ -1,0 +1,4 @@
+get.py
+.env
+venv/
+__pycache__/
