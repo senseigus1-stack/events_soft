@@ -30,7 +30,7 @@ if __name__ == "__main__":
         manager = EventManager(
             db_dsn=DB_DSN,
             api_base_url="https://kudago.com/public-api/v1.4",
-            clusters_path ='C:/Users/redmi/events_soft/ai/clusters.json'
+            clusters_path ='C:/Users/arsenii/events_soft/ai/clusters.json'
         )
 
         # Синхронизируем мероприятия + Статус от МО

@@ -69,6 +69,23 @@ class Database_Users:
                 ))
         self.connection.commit()
 
+    def get_events_description(self, ) -> List[Dict]:
+        query = """
+            SELECT description
+            FROM msk
+            UNION ALL
+            SELECT description
+            FROM spb
+        """
+        # Если city строго соответствует названию таблицы, можно упростить:
+        # query = f"SELECT description FROM {city};"
+        
+        with self.connection.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+        
+        return [{"description": row[0]} for row in results]
+
     def close(self):
         if self.connection:
             self.connection.close()

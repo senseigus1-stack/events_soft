@@ -296,8 +296,8 @@ class Database:
                 ))
         self.connection.commit()
 
-    def get_all_events(self) -> List[Dict]:
-        #table_name = city.lower().replace("-", "_")
+    def get_all_events(self, city:str) -> List[Dict]:
+        table_name = city.lower().replace("-", "_")
         all_events = []
 
         with self.connection.cursor() as cursor:
@@ -367,7 +367,7 @@ class EventManager:
 
     def __init__(self, db_dsn: str,
                 api_base_url: str = "https://kudago.com/public-api/v1.4",
-                clusters_path:str='C:/Users/redmi/events_soft/ai/clusters.json'
+                clusters_path:str='C:/Users/arsenii/events_soft/ai/clusters.json'
                 ):
         
         self.api = KudaGoAPI(api_base_url)
