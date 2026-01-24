@@ -36,20 +36,40 @@ if __name__ == "__main__":
         # Синхронизируем мероприятия + Статус от МО
         manager.sync_events(cities=CITIES, limit=50)
 
-        # Получаем все мероприятия
-        all_events = manager.get_all_events()
+
+        upcoming = manager.get_upcoming_events_periods(cities=CITIES)
+        print(upcoming)
+        
 
 
 
-        logging.info(f"Total events in all cities: {len(all_events)}")
+        # Cтатус от МО по пользователю (алгоритм )
 
-        # Выводим результаты
-        for event in all_events:
-            city = event['city']
-            title = event['title']
-            start_time = event['start_datetime']
-            status = event['status']
-            print(f"{city} | {title} | {start_time} | Статус: {status}")
+
+        #Будeт Отправка СМС ботом на АПИ тг (Макса)
+
+
+
+
+        # Обновление статуса мероприятий(разослано или нет)
+
+
+
+
+        #Все будет здесь, вся логика полностью, работа с api телеграмма, определение интересов пользователя(либо RNN, либо ручной ввод от пользователя)
+        #Привести пример событий по кластерам пользователю, использовать не уникальные кластеры в событии, но учиться на серии до 30-40 событиях???
+
+
+
+        # logging.info(f"Total events in all cities: {len(all_events)}")
+
+        # # Выводим результаты
+        # for event in all_events:
+        #     city = event['city']
+        #     title = event['title']
+        #     start_time = event['start_datetime']
+        #     status = event['status']
+        #     print(f"{city} | {title} | {start_time} | Статус: {status}")
 
     except Exception as e:
         logging.error(f"Execution error: {e}")

@@ -16,3 +16,12 @@ class Event_ML(BaseModel):
     tags: List[str] = []
     age_restriction: Optional[str] = None  #  for example: "18+"
     status_ml: str
+
+class User(BaseModel):
+    id: int
+    username: str
+    email: str
+    password: str
+    events: List[int] 
+    status_ml:str
+    

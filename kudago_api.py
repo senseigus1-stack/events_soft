@@ -13,6 +13,8 @@ import time
 from ai.main_status import load_clusters_from_file
 from ai.schemas import Event_ML
 from ai.cluster_service import ClusterService
+from sentence_transformers import SentenceTransformer
+
 
 load_dotenv()
 
@@ -205,9 +207,26 @@ class Database:
         );
         """
         
+
+
+        query3 = """
+                    CREATE TABLE IF NOT EXISTS users (
+                        id BIGINT PRIMARY KEY,
+                        name VARCHAR(255),
+                        city INTEGER,
+                        status_ml JSONB DEFAULT '[]',
+                        event_history JSONB DEFAULT '[]'
+                        );
+                    """
+    # 1 - msk
+    # 2 - spb
+    # 3 - msk & spb
+
+
         with self.connection.cursor() as cursor:
             cursor.execute(query1)
             cursor.execute(query2)
+            cursor.execute(query3)
         
         self.connection.commit()
         
@@ -357,6 +376,54 @@ class Database:
         self.connection.commit()
 
 
+
+
+    def get_actual_periods(self, city: str) -> List[Dict]:
+        """
+        Возвращает список актуальных периодов событий для указанного города
+        на ближайший месяц (от текущего момента до +30 дней).
+
+        Args:
+            city (str): Название города (используется для формирования имени таблицы).
+
+        Returns:
+            List[Dict]: Список словарей с ключами:
+                - event_id (int)
+                - start_timestamp (int)
+                - end_timestamp (int)
+        """
+        table_name = city.lower().replace("-", "_")
+        current_timestamp = int(time.time())
+        one_month_later_timestamp = current_timestamp + (30 * 24 * 60 * 60)  # +30 дней в секундах
+
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    SELECT event_id, start_timestamp, end_timestamp
+                    FROM event_dates_{table_name}
+                    WHERE start_timestamp >= %s
+                    AND start_timestamp < %s
+                    ORDER BY start_timestamp
+                    """,
+                    (current_timestamp, one_month_later_timestamp)
+                )
+
+                rows = cursor.fetchall()
+
+                result = []
+                for row in rows:
+                    result.append({
+                        "event_id": row[0],
+                        "start_timestamp": row[1],
+                        "end_timestamp": row[2]
+                    })
+                return result
+
+        except Exception as e:
+            logging.error(f"Ошибка при получении актуальных периодов для города {city}: {e}")
+            return []
+        
     def close(self):
         if self.connection:
             self.connection.close()
@@ -579,6 +646,23 @@ class EventManager:
         """Получить все мероприятия из всех городов через базу данных"""
         return self.db.get_all_events()
     
+    
+    def get_upcoming_events_periods(self, cities: List[str]) -> Dict[str, List[Dict]]:
+        """
+        Получает актуальные периоды событий для списка городов на ближайший месяц.
+
+        Args:
+            cities (List[str]): Список городов.
+
+        Returns:
+            Dict[str, List[Dict]]: Словарь, где ключ — город, значение — список периодов.
+        """
+        result = {}
+        for city in cities:
+            periods = self.db.get_actual_periods(city)
+            result[city] = periods
+        return result
+    
     def close(self):
         try:
             if self.db.connection:
@@ -667,16 +751,21 @@ class EventManager:
 
                         if valid_periods:
                             self.db.save_event_periods(event.id, valid_periods, city)
+                    
                             logging.debug(f"Сохранено {len(valid_periods)} периодов для события {event.id}")
                         else:
                             logging.warning(f"Нет валидных периодов для события {event.id}")
                     else:
                         logging.info(f"У события {event.id} нет периодов")
 
+                self.db.get_actual_periods(city)
+
                 logging.info(f"Завершена обработка города {city}. Сохранены данные по {len(full_events)} событиям.")
 
             except Exception as e:
                 logging.error(f"Ошибка при обработке города {city}: {e}", exc_info=True)
+
+
 
 
 # if __name__ == "__main__":
