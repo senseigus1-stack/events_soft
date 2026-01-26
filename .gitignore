@@ -2,3 +2,4 @@ get.py
 .env
 venv/
 __pycache__/
+.log

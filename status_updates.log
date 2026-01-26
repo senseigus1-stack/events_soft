@@ -1,0 +1,169 @@
+2026-01-26 19:37:01,161 | INFO | Use pytorch device_name: cpu
+2026-01-26 19:37:01,161 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-26 19:37:04,425 | INFO | Start polling
+2026-01-26 19:37:04,561 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 19:37:16,554 | INFO | Update id=240992172 is handled. Duration 187 ms by bot id=8469370108
+2026-01-26 19:37:19,723 | INFO | Update id=240992173 is handled. Duration 1437 ms by bot id=8469370108
+2026-01-26 19:37:29,263 | INFO | Update id=240992174 is handled. Duration 156 ms by bot id=8469370108
+2026-01-26 19:37:32,401 | INFO | Update id=240992175 is handled. Duration 187 ms by bot id=8469370108
+2026-01-26 19:37:37,937 | INFO | Update id=240992176 is handled. Duration 141 ms by bot id=8469370108
+2026-01-26 19:37:39,766 | INFO | Update id=240992177 is handled. Duration 93 ms by bot id=8469370108
+2026-01-26 19:37:49,274 | INFO | Update id=240992178 is handled. Duration 108 ms by bot id=8469370108
+2026-01-26 19:38:01,904 | INFO | Update id=240992179 is not handled. Duration 0 ms by bot id=8469370108
+2026-01-26 19:38:05,638 | INFO | Update id=240992180 is handled. Duration 781 ms by bot id=8469370108
+2026-01-26 19:38:10,658 | INFO | Обновление статуса пользователя. Исходный статус: [], Событие: [{'score': 0.7093584360376186, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.6565979366857697, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.532054008378484, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5203504617685303, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.4964845920511939, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.48554813457925394, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.4696690814679373, 'category': 'Кино‑ и сериальные фанаты', 'description': ''}, {'score': 0.438690146811598, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.43784931918375963, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.43503318212941916, 'category': 'Поклонники стендапа', 'description': ''}], вес: 0.3
+2026-01-26 19:38:10,658 | INFO | Обновлённый статус: [{'category': 'Театралы‑классики', 'score': 0.2128075308112856}, {'category': 'Молодые театралы', 'score': 0.1969793810057309}, {'category': 'Любители гастрономического театра', 'score': 0.15961620251354522}, {'category': 'Ценители оперного и вокального искусства', 'score': 0.15610513853055907}, {'category': 'Романтики‑эстеты', 'score': 0.14894537761535817}, {'category': 'Фанаты мюзиклов и Бродвея', 'score': 0.14566444037377618}, {'category': 'Кино‑ и сериальные фанаты', 'score': 0.14090072444038118}, {'category': 'Ностальгирующие романтики', 'score': 0.1316070440434794}, {'category': 'Литературные гурманы', 'score': 0.13135479575512787}, {'category': 'Поклонники стендапа', 'score': 0.13050995463882575}]
+2026-01-26 19:38:10,658 | INFO | Пользователь 5312854410 получил новый статус после лайка события 194567. Обновлённые категории: ['Театралы‑классики', 'Молодые театралы', 'Любители гастрономического театра', 'Ценители оперного и вокального искусства', 'Романтики‑эстеты', 'Фанаты мюзиклов и Бродвея', 'Кино‑ и сериальные фанаты', 'Ностальгирующие романтики', 'Литературные гурманы', 'Поклонники стендапа']
+2026-01-26 19:38:11,006 | INFO | Update id=240992181 is handled. Duration 342 ms by bot id=8469370108
+2026-01-26 20:20:10,094 | INFO | Polling stopped
+2026-01-26 20:20:10,346 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:30:28,516 | INFO | Use pytorch device_name: cpu
+2026-01-26 23:30:28,516 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-26 23:30:31,648 | INFO | Start polling
+2026-01-26 23:30:31,781 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:31:21,928 | INFO | Update id=240992182 is handled. Duration 202 ms by bot id=8469370108
+2026-01-26 23:31:27,530 | INFO | Update id=240992183 is handled. Duration 4172 ms by bot id=8469370108
+2026-01-26 23:31:37,806 | INFO | Update id=240992184 is handled. Duration 4139 ms by bot id=8469370108
+2026-01-26 23:32:00,464 | INFO | Polling stopped
+2026-01-26 23:32:00,725 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:38:09,073 | INFO | Use pytorch device_name: cpu
+2026-01-26 23:38:09,073 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-26 23:38:12,086 | INFO | Start polling
+2026-01-26 23:38:12,215 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:38:20,460 | INFO | Update id=240992185 is handled. Duration 4264 ms by bot id=8469370108
+2026-01-26 23:38:59,687 | INFO | Polling stopped
+2026-01-26 23:38:59,939 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:40:29,486 | INFO | Use pytorch device_name: cpu
+2026-01-26 23:40:29,486 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-26 23:40:32,461 | INFO | Start polling
+2026-01-26 23:40:32,600 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:41:45,428 | INFO | Update id=240992186 is handled. Duration 2108 ms by bot id=8469370108
+2026-01-26 23:41:49,905 | INFO | Обновление статуса пользователя. Исходный статус: [], Событие: [{'score': 0.7243730030427531, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.5859252688564252, 'category': 'Рок‑энтузиасты', 'description': ''}, {'score': 0.5811865615072642, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5349828425556631, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5008664289808176, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.4997088787593512, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.4924129939096486, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.4906554018231448, 'category': 'Реперки', 'description': ''}, {'score': 0.48889706068603106, 'category': 'Nostalgia‑поколение', 'description': ''}, {'score': 0.47906159131657083, 'category': 'Меломаны‑неоклассики', 'description': ''}], вес: 0.3
+2026-01-26 23:41:49,905 | INFO | Обновлённый статус: [{'category': 'Джаз‑адепты', 'score': 0.21731190091282593}, {'category': 'Рок‑энтузиасты', 'score': 0.17577758065692753}, {'category': 'Поклонники стендапа', 'score': 0.17435596845217927}, {'category': 'Романтики‑эстеты', 'score': 0.16049485276669892}, {'category': 'Ценители оперного и вокального искусства', 'score': 0.15025992869424526}, {'category': 'Любители этнографической музыки', 'score': 0.14991266362780536}, {'category': 'Ценители камерной музыки', 'score': 0.14772389817289458}, {'category': 'Реперки', 'score': 0.14719662054694344}, {'category': 'Nostalgia‑поколение', 'score': 0.1466691182058093}, {'category': 'Меломаны‑неоклассики', 'score': 0.14371847739497123}]
+2026-01-26 23:41:49,906 | INFO | Пользователь 5312854410 получил новый статус после лайка события 191267. Обновлённые категории: ['Джаз‑адепты', 'Рок‑энтузиасты', 'Поклонники стендапа', 'Романтики‑эстеты', 'Ценители оперного и вокального искусства', 'Любители этнографической музыки', 'Ценители камерной музыки', 'Реперки', 'Nostalgia‑поколение', 'Меломаны‑неоклассики']
+2026-01-26 23:41:50,035 | INFO | Update id=240992187 is handled. Duration 140 ms by bot id=8469370108
+2026-01-26 23:45:22,825 | INFO | Polling stopped
+2026-01-26 23:45:23,078 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:45:44,307 | INFO | Use pytorch device_name: cpu
+2026-01-26 23:45:44,308 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-26 23:45:47,461 | INFO | Start polling
+2026-01-26 23:45:47,589 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:45:58,090 | INFO | Update id=240992188 is not handled. Duration 0 ms by bot id=8469370108
+2026-01-26 23:45:58,090 | ERROR | Cause exception while process update id=240992188 by bot id=8469370108
+TypeError: the JSON object must be str, bytes or bytearray, not list
+Traceback (most recent call last):
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\router.py", line 162, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 74, in start
+    if db.get_user(user_id):
+       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\bot\db.py", line 73, in get_user
+    status_ml = json.loads(row[2])
+                ^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\json\__init__.py", line 339, in loads
+    raise TypeError(f'the JSON object must be str, bytes or bytearray, '
+TypeError: the JSON object must be str, bytes or bytearray, not list
+2026-01-26 23:47:51,735 | INFO | Polling stopped
+2026-01-26 23:47:52,001 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:47:59,318 | INFO | Use pytorch device_name: cpu
+2026-01-26 23:47:59,318 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-26 23:48:02,529 | INFO | Start polling
+2026-01-26 23:48:02,662 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-26 23:48:05,215 | INFO | Update id=240992189 is handled. Duration 171 ms by bot id=8469370108
+2026-01-26 23:48:09,161 | INFO | Update id=240992190 is handled. Duration 1328 ms by bot id=8469370108
+2026-01-26 23:48:31,640 | INFO | Polling stopped
+2026-01-26 23:48:31,904 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-27 00:03:07,616 | INFO | Use pytorch device_name: cpu
+2026-01-27 00:03:07,616 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-27 00:03:10,676 | INFO | Start polling
+2026-01-27 00:03:10,816 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-27 00:03:29,872 | INFO | Update id=240992191 is handled. Duration 156 ms by bot id=8469370108
+2026-01-27 00:03:33,777 | INFO | Update id=240992192 is handled. Duration 1188 ms by bot id=8469370108
+2026-01-27 00:03:47,243 | INFO | Обновление статуса пользователя. Исходный статус: [], Событие: [{'score': 0.7102561866267865, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.6934998729306736, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6730083225166734, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.6386311417530462, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.6044729975626144, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5676760665721421, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.5212951373023408, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.5212136622206246, 'category': 'Рок‑энтузиасты', 'description': ''}, {'score': 0.5171052569758162, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5051579604070153, 'category': 'Театралы‑классики', 'description': ''}], вес: 0.3
+2026-01-27 00:03:47,243 | INFO | Обновлённый статус: [{'category': 'Ценители оперного и вокального искусства', 'score': 0.21307685598803594}, {'category': 'Меломаны‑неоклассики', 'score': 0.20804996187920208}, {'category': 'Джаз‑адепты', 'score': 0.20190249675500202}, {'category': 'Ценители камерной музыки', 'score': 0.19158934252591386}, {'category': 'Романтики‑эстеты', 'score': 0.18134189926878433}, {'category': 'Ностальгирующие романтики', 'score': 0.17030281997164262}, {'category': 'Любители этнографической музыки', 'score': 0.15638854119070222}, {'category': 'Рок‑энтузиасты', 'score': 0.15636409866618736}, {'category': 'Молодые театралы', 'score': 0.15513157709274486}, {'category': 'Театралы‑классики', 'score': 0.15154738812210458}]
+2026-01-27 00:03:47,243 | INFO | Пользователь 5312854410 получил новый статус после лайка события 177588. Обновлённые категории: ['Ценители оперного и вокального искусства', 'Меломаны‑неоклассики', 'Джаз‑адепты', 'Ценители камерной музыки', 'Романтики‑эстеты', 'Ностальгирующие романтики', 'Любители этнографической музыки', 'Рок‑энтузиасты', 'Молодые театралы', 'Театралы‑классики']
+2026-01-27 00:03:47,360 | INFO | Update id=240992193 is handled. Duration 125 ms by bot id=8469370108
+2026-01-27 00:03:53,585 | INFO | Обновление статуса пользователя. Исходный статус: [], Событие: [{'score': 0.7700465942505147, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.6931410909627518, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6917306068755592, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.6725804610426125, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.6709921816335758, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.5908605941983753, 'category': 'Рок‑энтузиасты', 'description': ''}, {'score': 0.590120689895828, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.5871781568023275, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5851771204423923, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.5487943689129404, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}], вес: 0.3
+2026-01-27 00:03:53,585 | INFO | Обновлённый статус: [{'category': 'Ценители оперного и вокального искусства', 'score': 0.2310139782751544}, {'category': 'Меломаны‑неоклассики', 'score': 0.20794232728882553}, {'category': 'Ценители камерной музыки', 'score': 0.20751918206266776}, {'category': 'Романтики‑эстеты', 'score': 0.20177413831278374}, {'category': 'Джаз‑адепты', 'score': 0.20129765449007272}, {'category': 'Рок‑энтузиасты', 'score': 0.1772581782595126}, {'category': 'Ностальгирующие романтики', 'score': 0.1770362069687484}, {'category': 'Молодые театралы', 'score': 0.17615344704069827}, {'category': 'Любители этнографической музыки', 'score': 0.1755531361327177}, {'category': 'Фанаты мюзиклов и Бродвея', 'score': 0.16463831067388213}]
+2026-01-27 00:03:53,586 | INFO | Пользователь 5312854410 получил новый статус после лайка события 172671. Обновлённые категории: ['Ценители оперного и вокального искусства', 'Меломаны‑неоклассики', 'Ценители камерной музыки', 'Романтики‑эстеты', 'Джаз‑адепты', 'Рок‑энтузиасты', 'Ностальгирующие романтики', 'Молодые театралы', 'Любители этнографической музыки', 'Фанаты мюзиклов и Бродвея']
+2026-01-27 00:03:53,699 | INFO | Update id=240992194 is handled. Duration 110 ms by bot id=8469370108
+2026-01-27 00:03:56,639 | INFO | Обновление статуса пользователя. Исходный статус: [], Событие: [{'score': 0.7556056412062857, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.7489742353000957, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.7270808667285361, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.6741213866176523, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.6678880521852154, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.6456401543242452, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.6408554290342066, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.627050841103337, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.6049006017546719, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.5588274542741936, 'category': 'Поклонники этнического искусства', 'description': ''}], вес: 0.3
+2026-01-27 00:03:56,639 | INFO | Обновлённый статус: [{'category': 'Ценители оперного и вокального искусства', 'score': 0.2266816923618857}, {'category': 'Меломаны‑неоклассики', 'score': 0.2246922705900287}, {'category': 'Джаз‑адепты', 'score': 0.21812426001856083}, {'category': 'Ностальгирующие романтики', 'score': 0.20223641598529568}, {'category': 'Романтики‑эстеты', 'score': 0.20036641565556462}, {'category': 'Молодые театралы', 'score': 0.19369204629727355}, {'category': 'Фанаты мюзиклов и Бродвея', 'score': 0.19225662871026197}, {'category': 'Ценители камерной музыки', 'score': 0.1881152523310011}, {'category': 'Любители этнографической музыки', 'score': 0.18147018052640154}, {'category': 'Поклонники этнического искусства', 'score': 0.16764823628225806}]
+2026-01-27 00:03:56,639 | INFO | Пользователь 5312854410 получил новый статус после лайка события 192884. Обновлённые категории: ['Ценители оперного и вокального искусства', 'Меломаны‑неоклассики', 'Джаз‑адепты', 'Ностальгирующие романтики', 'Романтики‑эстеты', 'Молодые театралы', 'Фанаты мюзиклов и Бродвея', 'Ценители камерной музыки', 'Любители этнографической музыки', 'Поклонники этнического искусства']
+2026-01-27 00:03:57,032 | INFO | Update id=240992195 is handled. Duration 390 ms by bot id=8469370108
+2026-01-27 00:09:58,247 | INFO | Polling stopped
+2026-01-27 00:09:58,508 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-27 00:10:05,873 | INFO | Use pytorch device_name: cpu
+2026-01-27 00:10:05,873 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-27 00:10:08,892 | INFO | Start polling
+2026-01-27 00:10:09,029 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-27 00:10:18,611 | INFO | Update id=240992196 is handled. Duration 171 ms by bot id=8469370108
+2026-01-27 00:10:21,428 | INFO | Update id=240992197 is handled. Duration 1827 ms by bot id=8469370108
+2026-01-27 00:10:24,363 | INFO | Update id=240992198 is handled. Duration 125 ms by bot id=8469370108
+2026-01-27 00:10:29,789 | INFO | Update id=240992199 is handled. Duration 156 ms by bot id=8469370108
+2026-01-27 00:10:34,644 | INFO | Обновление статуса пользователя. Исходный статус: [], Событие: [{'score': 0.5589106301544714, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5566515070735893, 'category': 'Любители иммерсивного театра', 'description': ''}, {'score': 0.5540821476100515, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5427666774307156, 'category': 'Интеллектуалы‑гуманитарии', 'description': ''}, {'score': 0.5380072192654868, 'category': 'Поклонники перформативного искусства', 'description': ''}, {'score': 0.5369092188296538, 'category': 'Поклонники этнического искусства', 'description': ''}, {'score': 0.5246009630850295, 'category': 'Поклонники уличного кино', 'description': ''}, {'score': 0.5210075440689231, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5198024953269584, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5192460311445503, 'category': 'Ценители оперного и вокального искусства', 'description': ''}], вес: 0.3
+2026-01-27 00:10:34,644 | INFO | Обновлённый статус: [{'category': 'Молодые театралы', 'score': 0.1676731890463414}, {'category': 'Любители иммерсивного театра', 'score': 0.1669954521220768}, {'category': 'Романтики‑эстеты', 'score': 0.16622464428301545}, {'category': 'Интеллектуалы‑гуманитарии', 'score': 0.16283000322921468}, {'category': 'Поклонники перформативного искусства', 'score': 0.16140216577964603}, {'category': 'Поклонники этнического искусства', 'score': 0.16107276564889614}, {'category': 'Поклонники уличного кино', 'score': 0.15738028892550884}, {'category': 'Любители гастрономического театра', 'score': 0.15630226322067695}, {'category': 'Эзотерики и мистики', 'score': 0.15594074859808751}, {'category': 'Ценители оперного и вокального искусства', 'score': 0.15577380934336507}]
+2026-01-27 00:10:34,644 | INFO | Пользователь 5312854410 получил новый статус после лайка события 215502. Обновлённые категории: ['Молодые театралы', 'Любители иммерсивного театра', 'Романтики‑эстеты', 'Интеллектуалы‑гуманитарии', 'Поклонники перформативного искусства', 'Поклонники этнического искусства', 'Поклонники уличного кино', 'Любители гастрономического театра', 'Эзотерики и мистики', 'Ценители оперного и вокального искусства']
+2026-01-27 00:10:34,750 | INFO | Update id=240992200 is handled. Duration 109 ms by bot id=8469370108
+2026-01-27 00:11:09,754 | INFO | Update id=240992201 is handled. Duration 140 ms by bot id=8469370108
+2026-01-27 00:11:12,858 | INFO | Обновление статуса пользователя. Исходный статус: [{'category': 'Молодые театралы', 'score': 0.1676731890463414}, {'category': 'Любители иммерсивного театра', 'score': 0.1669954521220768}, {'category': 'Романтики‑эстеты', 'score': 0.16622464428301545}, {'category': 'Интеллектуалы‑гуманитарии', 'score': 0.16283000322921468}, {'category': 'Поклонники перформативного искусства', 'score': 0.16140216577964603}, {'category': 'Поклонники этнического искусства', 'score': 0.16107276564889614}, {'category': 'Поклонники уличного кино', 'score': 0.15738028892550884}, {'category': 'Любители гастрономического театра', 'score': 0.15630226322067695}, {'category': 'Эзотерики и мистики', 'score': 0.15594074859808751}, {'category': 'Ценители оперного и вокального искусства', 'score': 0.15577380934336507}], Событие: [{'score': 0.5589106301544714, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5566515070735893, 'category': 'Любители иммерсивного театра', 'description': ''}, {'score': 0.5540821476100515, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5427666774307156, 'category': 'Интеллектуалы‑гуманитарии', 'description': ''}, {'score': 0.5380072192654868, 'category': 'Поклонники перформативного искусства', 'description': ''}, {'score': 0.5369092188296538, 'category': 'Поклонники этнического искусства', 'description': ''}, {'score': 0.5246009630850295, 'category': 'Поклонники уличного кино', 'description': ''}, {'score': 0.5210075440689231, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5198024953269584, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5192460311445503, 'category': 'Ценители оперного и вокального искусства', 'description': ''}], вес: 0.3
+2026-01-27 00:11:12,858 | INFO | Обновлённый статус: [{'category': 'Молодые театралы', 'score': 0.3353463780926828}, {'category': 'Любители иммерсивного театра', 'score': 0.3339909042441536}, {'category': 'Романтики‑эстеты', 'score': 0.3324492885660309}, {'category': 'Интеллектуалы‑гуманитарии', 'score': 0.32566000645842935}, {'category': 'Поклонники перформативного искусства', 'score': 0.32280433155929206}, {'category': 'Поклонники этнического искусства', 'score': 0.3221455312977923}, {'category': 'Поклонники уличного кино', 'score': 0.3147605778510177}, {'category': 'Любители гастрономического театра', 'score': 0.3126045264413539}, {'category': 'Эзотерики и мистики', 'score': 0.31188149719617503}, {'category': 'Ценители оперного и вокального искусства', 'score': 0.31154761868673014}]
+2026-01-27 00:11:12,858 | INFO | Пользователь 5312854410 получил новый статус после лайка события 215502. Обновлённые категории: ['Молодые театралы', 'Любители иммерсивного театра', 'Романтики‑эстеты', 'Интеллектуалы‑гуманитарии', 'Поклонники перформативного искусства', 'Поклонники этнического искусства', 'Поклонники уличного кино', 'Любители гастрономического театра', 'Эзотерики и мистики', 'Ценители оперного и вокального искусства']
+2026-01-27 00:11:12,972 | INFO | Update id=240992202 is handled. Duration 109 ms by bot id=8469370108
+2026-01-27 00:11:16,114 | INFO | Update id=240992203 is handled. Duration 1218 ms by bot id=8469370108
+2026-01-27 00:12:07,385 | INFO | Обновление статуса пользователя. Исходный статус: [{'category': 'Молодые театралы', 'score': 0.3353463780926828}, {'category': 'Любители иммерсивного театра', 'score': 0.3339909042441536}, {'category': 'Романтики‑эстеты', 'score': 0.3324492885660309}, {'category': 'Интеллектуалы‑гуманитарии', 'score': 0.32566000645842935}, {'category': 'Поклонники перформативного искусства', 'score': 0.32280433155929206}, {'category': 'Поклонники этнического искусства', 'score': 0.3221455312977923}, {'category': 'Поклонники уличного кино', 'score': 0.3147605778510177}, {'category': 'Любители гастрономического театра', 'score': 0.3126045264413539}, {'category': 'Эзотерики и мистики', 'score': 0.31188149719617503}, {'category': 'Ценители оперного и вокального искусства', 'score': 0.31154761868673014}], Событие: [{'score': 0.650046812142065, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5786803761254959, 'category': 'Ночные искатели приключений', 'description': ''}, {'score': 0.5674775155209213, 'category': 'Любители астрономии и космоса', 'description': ''}, {'score': 0.5472158476152615, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.5164655324883327, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5111917327044533, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.5092522485897516, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5012171869411347, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.4784365399902767, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.47768904308420856, 'category': 'Рок‑энтузиасты', 'description': ''}], вес: 0.3
+2026-01-27 00:12:07,385 | INFO | Обновлённый статус: [{'category': 'Молодые театралы', 'score': 0.3353463780926828}, {'category': 'Любители иммерсивного театра', 'score': 0.3339909042441536}, {'category': 'Романтики‑эстеты', 'score': 0.5274633322086504}, {'category': 'Интеллектуалы‑гуманитарии', 'score': 0.32566000645842935}, {'category': 'Поклонники перформативного искусства', 'score': 0.32280433155929206}, {'category': 'Поклонники этнического искусства', 'score': 0.3221455312977923}, {'category': 'Поклонники уличного кино', 'score': 0.3147605778510177}, {'category': 'Любители гастрономического театра', 'score': 0.4675441861878537}, {'category': 'Эзотерики и мистики', 'score': 0.31188149719617503}, {'category': 'Ценители оперного и вокального искусства', 'score': 0.47571237297130864}, {'category': 'Ночные искатели приключений', 'score': 0.1736041128376488}, {'category': 'Любители астрономии и космоса', 'score': 0.17024325465627638}, {'category': 'Ценители камерной музыки', 'score': 0.15335751981133597}, {'category': 'Поклонники стендапа', 'score': 0.15277567457692548}, {'category': 'Джаз‑адепты', 'score': 0.1503651560823404}, {'category': 'Фанаты мюзиклов и Бродвея', 'score': 0.143530961997083}, {'category': 'Рок‑энтузиасты', 'score': 0.14330671292526256}]
+2026-01-27 00:12:07,385 | INFO | Пользователь 5312854410 получил новый статус после лайка события 214636. Обновлённые категории: ['Молодые театралы', 'Любители иммерсивного театра', 'Романтики‑эстеты', 'Интеллектуалы‑гуманитарии', 'Поклонники перформативного искусства', 'Поклонники этнического искусства', 'Поклонники уличного кино', 'Любители гастрономического театра', 'Эзотерики и мистики', 'Ценители оперного и вокального искусства', 'Ночные искатели приключений', 'Любители астрономии и космоса', 'Ценители камерной музыки', 'Поклонники стендапа', 'Джаз‑адепты', 'Фанаты мюзиклов и Бродвея', 'Рок‑энтузиасты']
+2026-01-27 00:12:07,596 | INFO | Update id=240992204 is handled. Duration 218 ms by bot id=8469370108
+2026-01-27 00:12:13,608 | INFO | Update id=240992205 is handled. Duration 359 ms by bot id=8469370108
+2026-01-27 00:12:15,134 | INFO | Update id=240992206 is handled. Duration 109 ms by bot id=8469370108
+2026-01-27 00:14:12,128 | INFO | Polling stopped
+2026-01-27 00:14:12,392 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-27 00:14:29,939 | INFO | Use pytorch device_name: cpu
+2026-01-27 00:14:29,939 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-01-27 00:14:32,943 | INFO | Start polling
+2026-01-27 00:14:33,075 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-01-27 00:15:01,913 | INFO | Update id=240992207 is handled. Duration 172 ms by bot id=8469370108
+2026-01-27 00:15:03,530 | INFO | Update id=240992208 is handled. Duration 110 ms by bot id=8469370108
+2026-01-27 00:15:14,882 | INFO | Update id=240992209 is handled. Duration 93 ms by bot id=8469370108
+2026-01-27 00:15:19,628 | INFO | Update id=240992210 is handled. Duration 125 ms by bot id=8469370108
+2026-01-27 00:15:25,251 | INFO | Update id=240992211 is handled. Duration 172 ms by bot id=8469370108
+2026-01-27 00:17:19,095 | INFO | Polling stopped
+2026-01-27 00:17:19,354 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'

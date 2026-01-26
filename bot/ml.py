@@ -6,6 +6,20 @@ from redis import Redis
 import json
 from config import Config
 
+import logging
+from datetime import datetime
+
+# Настраиваем логгер
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+    handlers=[
+        logging.FileHandler("status_updates.log", encoding="utf-8"),
+        logging.StreamHandler()  # вывод в консоль
+    ]
+)
+logger = logging.getLogger(__name__)
+
 class RNNModel(nn.Module):
     def __init__(self, input_size, hidden_size=64, num_layers=2):
         super().__init__()
@@ -118,3 +132,37 @@ class MLService:
         
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
         return [item[0] for item in sorted_scores[:Config.RECOMMEND_COUNT]]
+    
+    def update_user_status_ml(self, user_status: list, event_status: list, weight: float) -> list:
+        # Логируем исходное состояние
+        logger.info(
+            "Обновление статуса пользователя. "
+            f"Исходный статус: {user_status}, "
+            f"Событие: {event_status}, вес: {weight}"
+        )
+
+        updated_status = user_status.copy()
+
+        for event_cluster in event_status:
+            event_cat = event_cluster["category"]
+            event_score = event_cluster["score"]
+
+            user_cluster = next(
+                (c for c in updated_status if c["category"] == event_cat),
+                None
+            )
+
+            if user_cluster:
+                user_cluster["score"] += event_score * weight
+                user_cluster["score"] = max(0.0, min(1.0, user_cluster["score"]))
+            else:
+                updated_status.append({
+                    "category": event_cat,
+                    "score": event_score * weight
+                })
+
+        # Логируем результат
+        logger.info(
+            f"Обновлённый статус: {updated_status}"
+        )
+        return updated_status

@@ -1,10 +1,10 @@
 import asyncio
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from config import Config
 from db import Database_Users
 from ml import MLService
-from handlers import start, recommend, button_handler
+from handlers import start, recommend, button_handler, handle_city_selection
 
 async def main():
     # Инициализация
@@ -17,6 +17,7 @@ async def main():
     
     # Регистрация обработчиков
     dp.message.register(start, Command("start"))
+    dp.message.register(handle_city_selection, F.text.in_(["МСК", "СПБ", "МСК и СПБ"])) 
     dp.message.register(recommend, Command("recommend"))
     dp.callback_query.register(button_handler)
     
