@@ -1,0 +1,1 @@
+0 10 * * * python /app/get_all_main.py >> /var/log/cron.log 2>&1

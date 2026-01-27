@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Сервис бота Telegram
+  telegram-bot:
+    build: .
+    command: python bot/main.py
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - WEBHOOK_HOST=${WEBHOOK_HOST}
+      - WEBHOOK_PORT=${WEBHOOK_PORT}
+      - WEBHOOK_PATH=${WEBHOOK_PATH}
+      - USE_HTTPS=${USE_HTTPS}
+      - CERT_PATH=${CERT_PATH}
+      - KEY_PATH=${KEY_PATH}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db  # имя сервиса БД
+      - DB_PORT=${DB_PORT}
+    ports:
+      - "${WEBHOOK_PORT}:${WEBHOOK_PORT}"  # пробрасываем порт
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # Сервис синхронизации событий
+  events-sync:
+    build: .
+    command: python get_all_main.py  # путь крипту синхронизации
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT}
+      - KUDAGO_API_BASE=https://kudago.com/public-api/v1.4
+      - CLUSTERS_PATH=/app/ai/clusters.json  # путь внутри контейнера
+      - SYNC_INTERVAL=1  # часы между синхронизациями
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # База данных PostgreSQL
+
+
+  db:
+    image: postgres:16  # или postgres:latest
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
