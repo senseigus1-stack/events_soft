@@ -1,0 +1,329 @@
+2026-02-01 16:50:48,879 | INFO | Use pytorch device_name: cpu
+2026-02-01 16:50:48,879 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 16:50:51,916 | INFO | Start polling
+2026-02-01 16:50:52,054 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 16:52:32,800 | INFO | Update id=240992349 is handled. Duration 156 ms by bot id=8469370108
+2026-02-01 16:52:36,374 | INFO | Update id=240992350 is handled. Duration 77 ms by bot id=8469370108
+2026-02-01 16:52:42,148 | INFO | Update id=240992351 is handled. Duration 125 ms by bot id=8469370108
+2026-02-01 16:53:41,030 | INFO | Polling stopped
+2026-02-01 16:53:41,282 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 16:59:27,449 | INFO | Use pytorch device_name: cpu
+2026-02-01 16:59:27,449 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 16:59:31,403 | INFO | Start polling
+2026-02-01 16:59:31,546 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 16:59:42,959 | INFO | Update id=240992352 is handled. Duration 156 ms by bot id=8469370108
+2026-02-01 16:59:47,160 | ERROR | [ERROR] В recommend для user_id=5312854410: show_event() missing 1 required positional argument: 'state'
+2026-02-01 16:59:47,228 | INFO | Update id=240992353 is handled. Duration 62 ms by bot id=8469370108
+2026-02-01 17:06:10,830 | INFO | Polling stopped
+2026-02-01 17:06:11,085 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:06:21,100 | INFO | Use pytorch device_name: cpu
+2026-02-01 17:06:21,100 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 17:06:24,145 | INFO | Start polling
+2026-02-01 17:06:24,271 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:06:30,942 | INFO | Update id=240992354 is handled. Duration 218 ms by bot id=8469370108
+2026-02-01 17:06:32,183 | INFO | Update id=240992355 is handled. Duration 93 ms by bot id=8469370108
+2026-02-01 17:06:34,480 | INFO | Update id=240992356 is handled. Duration 110 ms by bot id=8469370108
+2026-02-01 17:06:35,714 | INFO | Update id=240992357 is handled. Duration 156 ms by bot id=8469370108
+2026-02-01 17:06:38,243 | INFO | Update id=240992358 is handled. Duration 156 ms by bot id=8469370108
+2026-02-01 17:06:41,040 | INFO | Update id=240992359 is handled. Duration 62 ms by bot id=8469370108
+2026-02-01 17:06:43,170 | INFO | Update id=240992360 is not handled. Duration 0 ms by bot id=8469370108
+2026-02-01 17:06:44,300 | INFO | Update id=240992361 is not handled. Duration 0 ms by bot id=8469370108
+2026-02-01 17:06:45,409 | INFO | Реферальный код 2b9e611c56 сохранён для пользователя 5312854410
+2026-02-01 17:06:45,523 | INFO | Update id=240992362 is handled. Duration 125 ms by bot id=8469370108
+2026-02-01 17:06:48,550 | INFO | Update id=240992363 is handled. Duration 62 ms by bot id=8469370108
+2026-02-01 17:06:51,218 | INFO | Update id=240992364 is handled. Duration 94 ms by bot id=8469370108
+2026-02-01 17:06:54,895 | INFO | Update id=240992365 is not handled. Duration 0 ms by bot id=8469370108
+2026-02-01 17:06:56,332 | INFO | Update id=240992366 is not handled. Duration 0 ms by bot id=8469370108
+2026-02-01 17:06:57,312 | INFO | Update id=240992367 is not handled. Duration 0 ms by bot id=8469370108
+2026-02-01 17:06:57,997 | INFO | Update id=240992368 is handled. Duration 77 ms by bot id=8469370108
+2026-02-01 17:06:59,220 | INFO | Update id=240992369 is handled. Duration 78 ms by bot id=8469370108
+2026-02-01 17:07:03,428 | INFO | Polling stopped
+2026-02-01 17:07:03,685 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:08:55,978 | INFO | Use pytorch device_name: cpu
+2026-02-01 17:08:55,978 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 17:08:58,936 | INFO | Start polling
+2026-02-01 17:08:59,090 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:09:00,399 | INFO | Update id=240992370 is handled. Duration 171 ms by bot id=8469370108
+2026-02-01 17:09:01,297 | INFO | Найдено событий в msk: 50
+2026-02-01 17:09:01,300 | INFO | Найдено событий в spb: 50
+2026-02-01 17:09:01,300 | INFO | Всего кандидатов: 100
+2026-02-01 17:09:01,300 | INFO | Рекомендовано событий: 5
+2026-02-01 17:09:01,374 | INFO | Update id=240992371 is handled. Duration 77 ms by bot id=8469370108
+2026-02-01 17:11:51,934 | INFO | Polling stopped
+2026-02-01 17:11:52,073 | ERROR | Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientOSError: [Errno 1] [SSL: APPLICATION_DATA_AFTER_CLOSE_NOTIFY] application data after close notify (_ssl.c:2706)
+2026-02-01 17:11:52,073 | WARNING | Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8469370108)
+2026-02-01 17:11:52,185 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:12:57,707 | INFO | Use pytorch device_name: cpu
+2026-02-01 17:12:57,707 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 17:13:01,597 | INFO | Start polling
+2026-02-01 17:13:01,743 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:13:23,960 | INFO | Update id=240992372 is handled. Duration 171 ms by bot id=8469370108
+2026-02-01 17:13:24,987 | INFO | Найдено событий в msk: 50
+2026-02-01 17:13:24,990 | INFO | Найдено событий в spb: 50
+2026-02-01 17:13:24,990 | INFO | Всего кандидатов: 100
+2026-02-01 17:13:24,990 | INFO | Рекомендовано событий: 5
+2026-02-01 17:13:24,990 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 17:13:24,990 | INFO | [show_event] Событие №0: {'id': 222554, 'title': 'концерт An Ordinary Miracle', 'description': '<p>На сцене выступит джазовое трио Даниэля Адиянца, чья музыка соединяет элегантность классики с живой свободой импровизации. Новый авторский материал, тонкие диалоги рояля, контрабаса и ударных и мягкий, почти кинематографичный драйв превратят вечер в историю о чуде, спрятанном в повседневных мелочах.</p>', 'start_datetime': 1772035200, 'event_url': 'https://kudago.com/msk/event/kontsert-an-ordinary-miracle/', 'status_ml': [{'score': 0.7259811009420416, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.5953028181446551, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5946494209889779, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5898906259777836, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.5834896812788638, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.5634137055846646, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.5581503426878528, 'category': 'Рок‑энтузиасты', 'description': ''}, {'score': 0.5341643925599544, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.5322508873844125, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5222508658534468, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}]}
+2026-02-01 17:13:24,990 | WARNING | [show_event] Пропускаем событие №0 (нет полей: ['id', 'title', 'event_url', 'city_code'])
+2026-02-01 17:13:24,990 | INFO | [show_event] attempt=1, current_index=1, len=5
+2026-02-01 17:13:24,990 | INFO | [show_event] Событие №1: {'id': 222572, 'title': 'концерт к 80-летию Александра Чайковского', 'description': '<p>Юбилейный вечер Александра Чайковского соберёт на одной сцене оркестр, народный ансамбль, хор и солистов, чтобы оживить древние сюжеты о князьях, битвах и выборе, от которого зависит судьба страны.</p>', 'start_datetime': 1770998400, 'event_url': 'https://kudago.com/msk/event/kontsert-k-80-letiyu-aleksandra-chajkovskogo/', 'status_ml': [{'score': 0.6789193628369479, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.6598328477334403, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.6582356805028029, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.641494921439439, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.6349521037659738, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.6339871244706325, 'category': 'Nostalgia‑поколение', 'description': ''}, {'score': 0.6183394642015883, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6167618742467407, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5902652790207135, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.5724396453951022, 'category': 'Поклонники этнического искусства', 'description': ''}]}
+2026-02-01 17:13:24,990 | WARNING | [show_event] Пропускаем событие №1 (нет полей: ['id', 'title', 'event_url', 'city_code'])
+2026-02-01 17:13:24,990 | INFO | [show_event] attempt=2, current_index=2, len=5
+2026-02-01 17:13:24,990 | INFO | [show_event] Событие №2: {'id': 222375, 'title': 'экскурсия по студии звукозаписи CineLab SoundMix', 'description': '<p>Экскурсия по студии звукозаписи CineLab SoundMix рассчитана на практикующих специалистов смежных сфер и тех, кто хочет освоить новую профессию. Участников ждёт погружение в профессии звукорежиссёра и саунд-дизайнера, возможность попробовать себя на практике и пообщаться с экспертами крупных кинопроектов.</p>', 'start_datetime': 1770728400, 'event_url': 'https://kudago.com/msk/event/obuchenie-ekskursiya-i-otkryityij-urok-po-zvukorezhissure/', 'status_ml': [{'score': 0.6396311016168199, 'category': 'Любители аудиоспектаклей и подкастов', 'description': ''}, {'score': 0.6220968574440899, 'category': 'Поклонники аналоговых синтезаторов', 'description': ''}, {'score': 0.5445288125420362, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.4968263050624343, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.476647098360141, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.4749603908404454, 'category': 'Поклонники современного танца', 'description': ''}, {'score': 0.4658161355322913, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.44247514532679066, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.441759607130101, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.44096882321123326, 'category': 'Рок‑энтузиасты', 'description': ''}]}
+2026-02-01 17:13:24,990 | WARNING | [show_event] Пропускаем событие №2 (нет полей: ['id', 'title', 'event_url', 'city_code'])
+2026-02-01 17:13:24,992 | INFO | [show_event] attempt=3, current_index=3, len=5
+2026-02-01 17:13:24,992 | INFO | [show_event] Событие №3: {'id': 222658, 'title': 'встреча «Солеá: беседы об испанской литературе на русском языке»', 'description': '<p>В камерном кругу поклонников испанской культуры участники обсудят трагедию Федерико Гарсиа Лорки «Йерма» и поговорят о том, как страстное желание способно определить судьбу. В центре беседы — одержимость материнством, вопрос личного выбора и хрупкая граница между мечтой и разрушительным поступком.</p>', 'start_datetime': 1770307200, 'event_url': 'https://kudago.com/msk/event/vstrecha-sole-besedyi-ob-ispanskoj-literature-na-russkom-yazyike/', 'status_ml': [{'score': 0.5367022082727076, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.5293758340153596, 'category': 'Интеллектуалы‑гуманитарии', 'description': ''}, {'score': 0.5248471287033728, 'category': 'Ценители камерной поэзии', 'description': ''}, {'score': 0.511015336942082, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5064629240255791, 'category': 'Любители иммерсивного театра', 'description': ''}, {'score': 0.48909878459415745, 'category': 'Поклонники перформативного искусства', 'description': ''}, {'score': 0.4733243139389276, 'category': 'Фанаты научной фантастики (литературные)', 'description': ''}, {'score': 0.45827889343578343, 'category': 'Любители абсурда и чёрного юмора', 'description': ''}, {'score': 0.4578246180642999, 'category': 'Фанаты видеоэссе и аналитического контента', 'description': ''}, {'score': 0.4492342090210616, 'category': 'Молодые театралы', 'description': ''}]}
+2026-02-01 17:13:24,992 | WARNING | [show_event] Пропускаем событие №3 (нет полей: ['id', 'title', 'event_url', 'city_code'])
+2026-02-01 17:13:24,992 | INFO | [show_event] attempt=4, current_index=4, len=5
+2026-02-01 17:13:24,992 | INFO | [show_event] Событие №4: {'id': 222526, 'title': 'концерт «Шедевры на бис. Государственный Кремлёвский оркестр»', 'description': '<p>Государственный Кремлёвский оркестр готовит яркий вечер для тех, кто любит узнавать знакомые мелодии с первых тактов. Под управлением Константина Чудовского прозвучат сочинения Чайковского, Грига, Баха, Масканьи, Оффенбаха и других авторов, а лирический тенор Алексея Татаринцева добавит программе особую эмоциональную выразительность.</p>', 'start_datetime': 1770825600, 'event_url': 'https://kudago.com/msk/event/kontsert-shedevryi-na-bis-gosudarstvennyij-kremlyovskij-orkestr/', 'status_ml': [{'score': 0.6202874691595, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6151300721831393, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.5972791264676227, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.590706093439108, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.5814096741567253, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.5654824093147087, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.5643989897490648, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.5470252660839843, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.5449899768756079, 'category': 'Nostalgia‑поколение', 'description': ''}, {'score': 0.5384658172481599, 'category': 'Поклонники стендапа', 'description': ''}]}
+2026-02-01 17:13:24,992 | WARNING | [show_event] Пропускаем событие №4 (нет полей: ['id', 'title', 'event_url', 'city_code'])
+2026-02-01 17:13:24,992 | INFO | [show_event] attempt=5, current_index=5, len=5
+2026-02-01 17:13:25,118 | INFO | Update id=240992373 is handled. Duration 125 ms by bot id=8469370108
+2026-02-01 17:14:44,740 | INFO | Polling stopped
+2026-02-01 17:14:44,992 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:14:56,599 | INFO | Use pytorch device_name: cpu
+2026-02-01 17:14:56,599 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 17:14:59,529 | INFO | Start polling
+2026-02-01 17:14:59,665 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:15:05,098 | INFO | Update id=240992374 is handled. Duration 141 ms by bot id=8469370108
+2026-02-01 17:15:06,803 | INFO | Найдено событий в msk: 50
+2026-02-01 17:15:06,807 | INFO | Найдено событий в spb: 50
+2026-02-01 17:15:06,807 | INFO | Всего кандидатов: 100
+2026-02-01 17:15:06,807 | INFO | Рекомендовано событий: 5
+2026-02-01 17:15:06,808 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 17:15:06,808 | INFO | [show_event] Событие №0: {'id': 152485, 'title': 'игровые знакомства Speed Dating для гостей 38-50 лет от FastLife', 'description': '<p>Вы цените время и хотите проводить его с максимальными для себя пользой и удовольствием? Тогда быстрые свидания от компании FastLife — то, что вам нужно. Оставьте сомнения, откройтесь новому, улыбнитесь и поверьте в любовь!</p>\n', 'start_datetime': 1770397200, 'event_url': 'https://kudago.com/msk/event/byistroe-svidanie-speed-dating-30/', 'status_ml': [{'score': 0.6873039091899615, 'category': 'Активные одиночки', 'description': ''}]}
+2026-02-01 17:15:07,822 | INFO | Update id=240992375 is handled. Duration 1016 ms by bot id=8469370108
+2026-02-01 17:15:36,567 | ERROR | Ошибка преобразования ID в числе для 5312854410, data=confirm_go_152485: invalid literal for int() with base 10: 'go'
+2026-02-01 17:15:36,698 | INFO | Update id=240992376 is handled. Duration 139 ms by bot id=8469370108
+2026-02-01 17:15:44,079 | ERROR | Ошибка преобразования ID в числе для 5312854410, data=confirm_go_152485: invalid literal for int() with base 10: 'go'
+2026-02-01 17:15:44,128 | INFO | Update id=240992377 is handled. Duration 46 ms by bot id=8469370108
+2026-02-01 17:15:44,659 | ERROR | Ошибка преобразования ID в числе для 5312854410, data=confirm_go_152485: invalid literal for int() with base 10: 'go'
+2026-02-01 17:15:44,733 | INFO | Update id=240992378 is handled. Duration 77 ms by bot id=8469370108
+2026-02-01 17:15:45,195 | ERROR | Ошибка преобразования ID в числе для 5312854410, data=confirm_go_152485: invalid literal for int() with base 10: 'go'
+2026-02-01 17:15:45,323 | INFO | Update id=240992379 is handled. Duration 139 ms by bot id=8469370108
+2026-02-01 17:15:45,444 | ERROR | Ошибка преобразования ID в числе для 5312854410, data=confirm_go_152485: invalid literal for int() with base 10: 'go'
+2026-02-01 17:15:45,585 | INFO | Update id=240992380 is handled. Duration 139 ms by bot id=8469370108
+2026-02-01 17:15:46,534 | INFO | [show_event] attempt=0, current_index=1, len=5
+2026-02-01 17:15:46,535 | INFO | [show_event] Событие №1: {'id': 199351, 'title': 'концерт Olympic Orchestra «Вселенная неоклассики»', 'description': '<p>Петербургский Olympic Orchestra презентует на московской сцене программу всемирно известной неоклассики.</p>', 'start_datetime': 1769965200, 'event_url': 'https://kudago.com/msk/event/vselennaya-neoklassiki-olympic-orchestra/', 'status_ml': [{'score': 0.7062490633316083, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.5951031091368515, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.5743380658923658, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.5490560747867956, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5405765129926112, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.5352075354876522, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.5193336984967567, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5187443191725897, 'category': 'Nostalgia‑поколение', 'description': ''}, {'score': 0.514474354355039, 'category': 'Исследователи городской среды', 'description': ''}, {'score': 0.49837631573659436, 'category': 'Ценители камерной музыки', 'description': ''}]}
+2026-02-01 17:15:46,611 | INFO | Update id=240992381 is handled. Duration 77 ms by bot id=8469370108
+2026-02-01 17:15:49,726 | ERROR | Ошибка преобразования ID в числе для 5312854410, data=confirm_go_199351: invalid literal for int() with base 10: 'go'
+2026-02-01 17:15:49,818 | INFO | Update id=240992382 is handled. Duration 93 ms by bot id=8469370108
+2026-02-01 17:17:27,206 | INFO | Polling stopped
+2026-02-01 17:17:27,465 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:17:40,104 | INFO | Use pytorch device_name: cpu
+2026-02-01 17:17:40,105 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 17:17:43,111 | INFO | Start polling
+2026-02-01 17:17:43,239 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:17:44,506 | INFO | Update id=240992383 is handled. Duration 171 ms by bot id=8469370108
+2026-02-01 17:17:45,557 | INFO | Найдено событий в msk: 50
+2026-02-01 17:17:45,560 | INFO | Найдено событий в spb: 50
+2026-02-01 17:17:45,560 | INFO | Всего кандидатов: 100
+2026-02-01 17:17:45,560 | INFO | Рекомендовано событий: 5
+2026-02-01 17:17:45,560 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 17:17:45,560 | INFO | [show_event] Событие №0: {'id': 222565, 'title': 'концерт «Звёзды XXI века»', 'description': '<p>На сцене встретятся молодые солисты и большой оркестр, чтобы сыграть три контрастных концерта Бетховена, Шостаковича и Бартока. </p>', 'start_datetime': 1770393600, 'event_url': 'https://kudago.com/msk/event/kontsert-zvezdyi-xxi-veka-fftqyg/', 'status_ml': [{'score': 0.7789553622023369, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.72587398785151, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.717329975939917, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6960833045992172, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.653217476559597, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.615282811678157, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.5619252123222678, 'category': 'Любители этнографической музыки', 'description': ''}, {'score': 0.549759219148704, 'category': 'Рок‑энтузиасты', 'description': ''}, {'score': 0.5360092655956981, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5323533435111134, 'category': 'Молодые театралы', 'description': ''}]}
+2026-02-01 17:17:45,660 | INFO | Update id=240992384 is handled. Duration 110 ms by bot id=8469370108
+2026-02-01 17:19:46,827 | ERROR | Ошибка преобразования ID в числе для 5312854410, data=confirm_go_222565: invalid literal for int() with base 10: 'go'
+2026-02-01 17:19:46,954 | INFO | Update id=240992385 is handled. Duration 125 ms by bot id=8469370108
+2026-02-01 17:48:23,444 | ERROR | Ошибка преобразования ID в числе для 5312854410, data=confirm_go_222565: invalid literal for int() with base 10: 'go'
+2026-02-01 17:48:23,572 | INFO | Update id=240992386 is handled. Duration 125 ms by bot id=8469370108
+2026-02-01 17:49:19,837 | INFO | Polling stopped
+2026-02-01 17:49:20,091 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:49:27,287 | INFO | Use pytorch device_name: cpu
+2026-02-01 17:49:27,287 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 17:49:30,389 | INFO | Start polling
+2026-02-01 17:49:30,525 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:49:35,097 | INFO | Update id=240992387 is handled. Duration 172 ms by bot id=8469370108
+2026-02-01 17:49:36,394 | INFO | Найдено событий в msk: 50
+2026-02-01 17:49:36,396 | INFO | Найдено событий в spb: 50
+2026-02-01 17:49:36,397 | INFO | Всего кандидатов: 100
+2026-02-01 17:49:36,397 | INFO | Рекомендовано событий: 5
+2026-02-01 17:49:36,397 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 17:49:36,397 | INFO | [show_event] Событие №0: {'id': 221492, 'title': 'cвидание в темноте от GOKON', 'description': '<p>Загадочный полумрак, доверительная атмосфера и\xa0интересные темы для обсуждений\xa0— вас ждёт <a class="external-link" href="https://gokon.fastlife.su/tproduct/1449900361-491265095192-svidanie-v-temnote-23-noyabrya-voskresen?utm_source=kudago&utm_medium=site&utm_campaign=vtemnote&erid=2SDnjckgKg1" rel="nofollow" target="_blank"><strong>красивый вечер знакомств</strong></a>, где\xa0зрение перестанет быть главным чувством, уступая место\xa0искренности.</p>', 'start_datetime': 1771084800, 'event_url': 'https://kudago.com/msk/event/vecherinka-svidanie-v-temnote/', 'status_ml': [{'score': 0.5084583547417619, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5068563273366405, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5053153956613212, 'category': 'Любители астрономии и космоса', 'description': ''}, {'score': 0.4916818703219087, 'category': 'Фанаты подкастов о необъяснимом', 'description': ''}, {'score': 0.4915108750120928, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.48284608550064734, 'category': 'Ночные искатели приключений', 'description': ''}, {'score': 0.4620670098384313, 'category': 'Фанаты киберпанка и антиутопий', 'description': ''}, {'score': 0.4592178972796227, 'category': 'Кино‑ и сериальные фанаты', 'description': ''}, {'score': 0.43861008446482685, 'category': 'Любители астрофотографии', 'description': ''}, {'score': 0.4345361462804065, 'category': 'Корпоративные организаторы', 'description': ''}]}
+2026-02-01 17:49:36,551 | INFO | Update id=240992388 is handled. Duration 156 ms by bot id=8469370108
+2026-02-01 17:50:51,538 | ERROR | Неожиданная ошибка в button_handler для 5312854410: Database_Users.confirm_event() missing 1 required positional argument: 'city_code'
+Traceback (most recent call last):
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 297, in button_handler
+    success = db.confirm_event(user_id, event_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Database_Users.confirm_event() missing 1 required positional argument: 'city_code'
+2026-02-01 17:50:51,668 | INFO | Update id=240992389 is handled. Duration 139 ms by bot id=8469370108
+2026-02-01 17:52:19,580 | INFO | Polling stopped
+2026-02-01 17:52:19,839 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:52:29,568 | INFO | Use pytorch device_name: cpu
+2026-02-01 17:52:29,568 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 17:52:32,596 | INFO | Start polling
+2026-02-01 17:52:32,717 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 17:52:36,533 | INFO | Update id=240992390 is handled. Duration 172 ms by bot id=8469370108
+2026-02-01 17:52:38,070 | INFO | Найдено событий в msk: 50
+2026-02-01 17:52:38,073 | INFO | Найдено событий в spb: 50
+2026-02-01 17:52:38,074 | INFO | Всего кандидатов: 100
+2026-02-01 17:52:38,074 | INFO | Рекомендовано событий: 5
+2026-02-01 17:52:38,074 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 17:52:38,074 | INFO | [show_event] Событие №0: {'id': 209325, 'title': 'концерт «Магическая вселенная Гарри Поттера»', 'description': '<p>Ансамбль GRANI MUSIC приглашает в путешествие по вселенной Гарри Поттера. Гости концерта перенесутся в Хогвартс под музыку саундтреков к фильмам о мальчике-волшебнике. </p>', 'start_datetime': 1772211600, 'event_url': 'https://kudago.com/msk/event/kontsert-magicheskaya-vselennaya-garri-pottera/', 'status_ml': [{'score': 0.7226732009718695, 'category': 'Кино‑ и сериальные фанаты', 'description': ''}, {'score': 0.5570445389254042, 'category': 'Геймеры и гики', 'description': ''}, {'score': 0.5153891316783572, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.4954135984080863, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.46797679007628085, 'category': 'Молодёжь‑экспериментаторы', 'description': ''}, {'score': 0.4382671558301706, 'category': 'Ночные искатели приключений', 'description': ''}, {'score': 0.4374185431987105, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.43713189873168623, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.4282273147867164, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.42623963915595275, 'category': 'Молодые театралы', 'description': ''}]}
+2026-02-01 17:52:38,311 | INFO | Update id=240992391 is handled. Duration 250 ms by bot id=8469370108
+2026-02-01 17:52:44,178 | INFO | Обновление статуса пользователя. Исходный статус: [], Событие: [{'score': 0.7226732009718695, 'category': 'Кино‑ и сериальные фанаты', 'description': ''}, {'score': 0.5570445389254042, 'category': 'Геймеры и гики', 'description': ''}, {'score': 0.5153891316783572, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.4954135984080863, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.46797679007628085, 'category': 'Молодёжь‑экспериментаторы', 'description': ''}, {'score': 0.4382671558301706, 'category': 'Ночные искатели приключений', 'description': ''}, {'score': 0.4374185431987105, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.43713189873168623, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.4282273147867164, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.42623963915595275, 'category': 'Молодые театралы', 'description': ''}], вес: 0.3
+2026-02-01 17:52:44,178 | INFO | Обновлённый статус: [{'category': 'Кино‑ и сериальные фанаты', 'score': 0.21680196029156085}, {'category': 'Геймеры и гики', 'score': 0.16711336167762125}, {'category': 'Романтики‑эстеты', 'score': 0.15461673950350716}, {'category': 'Ценители оперного и вокального искусства', 'score': 0.14862407952242587}, {'category': 'Молодёжь‑экспериментаторы', 'score': 0.14039303702288425}, {'category': 'Ночные искатели приключений', 'score': 0.13148014674905117}, {'category': 'Меломаны‑неоклассики', 'score': 0.13122556295961313}, {'category': 'Джаз‑адепты', 'score': 0.13113956961950587}, {'category': 'Эзотерики и мистики', 'score': 0.1284681944360149}, {'category': 'Молодые театралы', 'score': 0.12787189174678582}]
+2026-02-01 17:52:44,178 | INFO | Пользователь 5312854410 обновил статус после лайка события 209325. Категории: ['Кино‑ и сериальные фанаты', 'Геймеры и гики', 'Романтики‑эстеты', 'Ценители оперного и вокального искусства', 'Молодёжь‑экспериментаторы', 'Ночные искатели приключений', 'Меломаны‑неоклассики', 'Джаз‑адепты', 'Эзотерики и мистики', 'Молодые театралы']
+2026-02-01 17:52:44,226 | INFO | [show_event] attempt=0, current_index=1, len=5
+2026-02-01 17:52:44,226 | INFO | [show_event] Событие №1: {'id': 222664, 'title': 'лекция «Логико-философский клуб проф. В.И. Моисеева. Этика Спинозы: логика субстанции и теория аффекта»', 'description': '<p>Что происходит, когда философский трактат читают всерьёз, строка за строкой, а не по школьным конспектам? На встрече с логико-философским клубом проф. В.И. Моисеева участники разбирают «Этику» Спинозы как живой текст — о свободе, аффектах и человеческой стойкости, в которой каждый узнаёт собственные сомнения и надежды.</p>', 'start_datetime': 1770132600, 'event_url': 'https://kudago.com/msk/event/lektsiya-logiko-filosofskij-klub-prof-vi-moiseeva-etika-spinozyi-logika-substantsii-i-teoriya-affekta/', 'status_ml': [{'score': 0.5381069613135356, 'category': 'Любители научно‑популярных лекций', 'description': ''}, {'score': 0.4328079386641919, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.43016370953404215, 'category': 'Поклонники перформативного искусства', 'description': ''}, {'score': 0.4286803220775788, 'category': 'Ценители камерной поэзии', 'description': ''}, {'score': 0.42393477152474013, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.4204975223945019, 'category': 'Интеллектуалы‑гуманитарии', 'description': ''}, {'score': 0.4140478813968151, 'category': 'Фанаты подкастов о необъяснимом', 'description': ''}, {'score': 0.40841003384536084, 'category': 'Фанаты научной фантастики (литературные)', 'description': ''}, {'score': 0.4052282271805501, 'category': 'Любители лекций', 'description': ''}]}
+2026-02-01 17:52:44,331 | INFO | Update id=240992392 is handled. Duration 156 ms by bot id=8469370108
+2026-02-01 17:52:51,594 | INFO | [show_event] attempt=0, current_index=2, len=5
+2026-02-01 17:52:51,596 | INFO | [show_event] Событие №2: {'id': 218553, 'title': 'концерт «Вивальди. Времена года. Оркестр с роялем при свечах»', 'description': '<p>В летнем парке, на сцене Зелёного театра ВДНХ зажгутся сотни свечей. В исполнении коллектива Olympic Orchestrа прозвучат сочинения композиторов-классиков, наполненные мощной энергией молодых музыкантов.</p>', 'start_datetime': 1771077600, 'event_url': 'https://kudago.com/msk/event/kontsert-vivaldi-vremena-goda-orkestr-s-royalem-pri-svechah/', 'status_ml': [{'score': 0.7257888091423482, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.6686745399873175, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.6396548526578456, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.6159751710816632, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6149961287299679, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.6108582889247212, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.5481934721902241, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.540794858246757, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5401469933383592, 'category': 'Ночные искатели приключений', 'description': ''}, {'score': 0.5351776329895735, 'category': 'Nostalgia‑поколение', 'description': ''}]}
+2026-02-01 17:52:51,724 | INFO | Update id=240992393 is handled. Duration 234 ms by bot id=8469370108
+2026-02-01 17:52:54,867 | ERROR | [DB] Ошибка при подтверждении мероприятия 218553 для 5312854410: ОШИБКА:  значение NULL в столбце "city_code" отношения "user_confirmed_events" нарушает ограничение NOT NULL
+DETAIL:  Ошибочная строка содержит (5312854410, 218553, null, 2026-02-01 17:52:54.8641+03, f).
+
+2026-02-01 17:52:54,988 | INFO | Update id=240992394 is handled. Duration 125 ms by bot id=8469370108
+2026-02-01 17:55:55,845 | INFO | Polling stopped
+2026-02-01 17:55:55,903 | ERROR | Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientOSError: [Errno 1] [SSL: APPLICATION_DATA_AFTER_CLOSE_NOTIFY] application data after close notify (_ssl.c:2706)
+2026-02-01 17:55:55,903 | WARNING | Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8469370108)
+2026-02-01 17:55:56,096 | INFO | Polling stopped for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 18:26:00,846 | INFO | Use pytorch device_name: cpu
+2026-02-01 18:26:00,847 | INFO | Load pretrained SentenceTransformer: paraphrase-multilingual-MiniLM-L12-v2
+2026-02-01 18:26:03,900 | INFO | Start polling
+2026-02-01 18:26:04,031 | INFO | Run polling for bot @kytchi_bot id=8469370108 - 'КЫТЧИ'
+2026-02-01 18:26:19,842 | INFO | Update id=240992395 is handled. Duration 172 ms by bot id=8469370108
+2026-02-01 18:26:23,452 | INFO | Пользователь 5312854410 добавлен в БД с городом 3
+2026-02-01 18:26:23,533 | INFO | Update id=240992396 is handled. Duration 93 ms by bot id=8469370108
+2026-02-01 18:26:24,902 | INFO | Найдено событий в msk: 50
+2026-02-01 18:26:24,904 | INFO | Найдено событий в spb: 50
+2026-02-01 18:26:24,904 | INFO | Всего кандидатов: 100
+2026-02-01 18:26:24,904 | INFO | Рекомендовано событий: 5
+2026-02-01 18:26:24,904 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 18:26:24,904 | INFO | [show_event] Событие №0: {'id': 222522, 'title': 'спектакль «Шанель № Стравинский»', 'description': '<p>Ночь в Театре Елисейских полей превращается в откровенный разговор двух легенд: модельера Габриэль «Коко» Шанель и композитора Игоря Стравинского. В полумраке пустого зала они спорят, вспоминают, ранят и поддерживают друг друга, испытывая границы любви, свободы и творчества, пока музыка меняет ход их судьбы.</p>', 'start_datetime': 1770480000, 'event_url': 'https://kudago.com/msk/event/spektakl-shanel--stravinskij/', 'status_ml': [{'score': 0.6350985852290517, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5936719210950441, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5594595320723657, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.553441688307406, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.5490529530080989, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5301838272395853, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.5212772757422124, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.5203556594701183, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5092562348370696, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5064165898399305, 'category': 'Любители иммерсивного театра', 'description': ''}]}
+2026-02-01 18:26:25,039 | INFO | Update id=240992397 is handled. Duration 141 ms by bot id=8469370108
+2026-02-01 18:26:32,032 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 18:26:32,032 | INFO | [show_event] Событие №0: {'id': 222522, 'title': 'спектакль «Шанель № Стравинский»', 'description': '<p>Ночь в Театре Елисейских полей превращается в откровенный разговор двух легенд: модельера Габриэль «Коко» Шанель и композитора Игоря Стравинского. В полумраке пустого зала они спорят, вспоминают, ранят и поддерживают друг друга, испытывая границы любви, свободы и творчества, пока музыка меняет ход их судьбы.</p>', 'start_datetime': 1770480000, 'event_url': 'https://kudago.com/msk/event/spektakl-shanel--stravinskij/', 'status_ml': [{'score': 0.6350985852290517, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5936719210950441, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5594595320723657, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.553441688307406, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.5490529530080989, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5301838272395853, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.5212772757422124, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.5203556594701183, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5092562348370696, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5064165898399305, 'category': 'Любители иммерсивного театра', 'description': ''}]}
+2026-02-01 18:26:32,128 | ERROR | Неожиданная ошибка в button_handler для 5312854410: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+Traceback (most recent call last):
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 300, in button_handler
+    await show_event(callback, state)
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 224, in show_event
+    await message_or_callback.message.edit_text(
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\bot.py", line 488, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 189, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2026-02-01 18:26:32,184 | INFO | Update id=240992398 is handled. Duration 235 ms by bot id=8469370108
+2026-02-01 18:27:05,780 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 18:27:05,781 | INFO | [show_event] Событие №0: {'id': 222522, 'title': 'спектакль «Шанель № Стравинский»', 'description': '<p>Ночь в Театре Елисейских полей превращается в откровенный разговор двух легенд: модельера Габриэль «Коко» Шанель и композитора Игоря Стравинского. В полумраке пустого зала они спорят, вспоминают, ранят и поддерживают друг друга, испытывая границы любви, свободы и творчества, пока музыка меняет ход их судьбы.</p>', 'start_datetime': 1770480000, 'event_url': 'https://kudago.com/msk/event/spektakl-shanel--stravinskij/', 'status_ml': [{'score': 0.6350985852290517, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5936719210950441, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5594595320723657, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.553441688307406, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.5490529530080989, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5301838272395853, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.5212772757422124, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.5203556594701183, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5092562348370696, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5064165898399305, 'category': 'Любители иммерсивного театра', 'description': ''}]}
+2026-02-01 18:27:05,845 | ERROR | Неожиданная ошибка в button_handler для 5312854410: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+Traceback (most recent call last):
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 300, in button_handler
+    await show_event(callback, state)
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 224, in show_event
+    await message_or_callback.message.edit_text(
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\bot.py", line 488, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 189, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2026-02-01 18:27:05,895 | INFO | Update id=240992399 is handled. Duration 250 ms by bot id=8469370108
+2026-02-01 18:27:06,715 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 18:27:06,715 | INFO | [show_event] Событие №0: {'id': 222522, 'title': 'спектакль «Шанель № Стравинский»', 'description': '<p>Ночь в Театре Елисейских полей превращается в откровенный разговор двух легенд: модельера Габриэль «Коко» Шанель и композитора Игоря Стравинского. В полумраке пустого зала они спорят, вспоминают, ранят и поддерживают друг друга, испытывая границы любви, свободы и творчества, пока музыка меняет ход их судьбы.</p>', 'start_datetime': 1770480000, 'event_url': 'https://kudago.com/msk/event/spektakl-shanel--stravinskij/', 'status_ml': [{'score': 0.6350985852290517, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5936719210950441, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5594595320723657, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.553441688307406, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.5490529530080989, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5301838272395853, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.5212772757422124, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.5203556594701183, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5092562348370696, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5064165898399305, 'category': 'Любители иммерсивного театра', 'description': ''}]}
+2026-02-01 18:27:06,800 | ERROR | Неожиданная ошибка в button_handler для 5312854410: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+Traceback (most recent call last):
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 300, in button_handler
+    await show_event(callback, state)
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 224, in show_event
+    await message_or_callback.message.edit_text(
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\bot.py", line 488, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 189, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2026-02-01 18:27:06,856 | INFO | Update id=240992400 is handled. Duration 202 ms by bot id=8469370108
+2026-02-01 18:27:07,129 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 18:27:07,130 | INFO | [show_event] Событие №0: {'id': 222522, 'title': 'спектакль «Шанель № Стравинский»', 'description': '<p>Ночь в Театре Елисейских полей превращается в откровенный разговор двух легенд: модельера Габриэль «Коко» Шанель и композитора Игоря Стравинского. В полумраке пустого зала они спорят, вспоминают, ранят и поддерживают друг друга, испытывая границы любви, свободы и творчества, пока музыка меняет ход их судьбы.</p>', 'start_datetime': 1770480000, 'event_url': 'https://kudago.com/msk/event/spektakl-shanel--stravinskij/', 'status_ml': [{'score': 0.6350985852290517, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5936719210950441, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5594595320723657, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.553441688307406, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.5490529530080989, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5301838272395853, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.5212772757422124, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.5203556594701183, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5092562348370696, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5064165898399305, 'category': 'Любители иммерсивного театра', 'description': ''}]}
+2026-02-01 18:27:07,192 | ERROR | Неожиданная ошибка в button_handler для 5312854410: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+Traceback (most recent call last):
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 300, in button_handler
+    await show_event(callback, state)
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 224, in show_event
+    await message_or_callback.message.edit_text(
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\bot.py", line 488, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 189, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2026-02-01 18:27:07,256 | INFO | Update id=240992401 is handled. Duration 171 ms by bot id=8469370108
+2026-02-01 18:27:07,383 | INFO | [show_event] attempt=0, current_index=0, len=5
+2026-02-01 18:27:07,383 | INFO | [show_event] Событие №0: {'id': 222522, 'title': 'спектакль «Шанель № Стравинский»', 'description': '<p>Ночь в Театре Елисейских полей превращается в откровенный разговор двух легенд: модельера Габриэль «Коко» Шанель и композитора Игоря Стравинского. В полумраке пустого зала они спорят, вспоминают, ранят и поддерживают друг друга, испытывая границы любви, свободы и творчества, пока музыка меняет ход их судьбы.</p>', 'start_datetime': 1770480000, 'event_url': 'https://kudago.com/msk/event/spektakl-shanel--stravinskij/', 'status_ml': [{'score': 0.6350985852290517, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5936719210950441, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5594595320723657, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.553441688307406, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.5490529530080989, 'category': 'Молодые театралы', 'description': ''}, {'score': 0.5301838272395853, 'category': 'Театралы‑классики', 'description': ''}, {'score': 0.5212772757422124, 'category': 'Литературные гурманы', 'description': ''}, {'score': 0.5203556594701183, 'category': 'Любители гастрономического театра', 'description': ''}, {'score': 0.5092562348370696, 'category': 'Эзотерики и мистики', 'description': ''}, {'score': 0.5064165898399305, 'category': 'Любители иммерсивного театра', 'description': ''}]}
+2026-02-01 18:27:07,762 | ERROR | Неожиданная ошибка в button_handler для 5312854410: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+Traceback (most recent call last):
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 300, in button_handler
+    await show_event(callback, state)
+  File "C:\Users\arsenii\events_soft\bot\handlers.py", line 224, in show_event
+    await message_or_callback.message.edit_text(
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\bot.py", line 488, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 189, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\arsenii\events_soft\venv\Lib\site-packages\aiogram\client\session\base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+2026-02-01 18:27:07,813 | INFO | Update id=240992402 is handled. Duration 485 ms by bot id=8469370108
+2026-02-01 18:27:07,922 | INFO | [show_event] attempt=0, current_index=1, len=5
+2026-02-01 18:27:07,922 | INFO | [show_event] Событие №1: {'id': 222555, 'title': 'концерт «Семь Последних Слов Христа»', 'description': '<p>Есть концерты, после которых хочется говорить тише. Музыка Йозефа Гайдна «Семь последних слов Христа» относится именно к таким произведениям: в ней почти нет внешних эффектов, зато много пространства для мысли и внимательного слушания.</p>', 'start_datetime': 1772121600, 'event_url': 'https://kudago.com/msk/event/kontsert-sem-poslednih-slov-hrista/', 'status_ml': [{'score': 0.6976687959765866, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.6694912777457989, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.6573313796276262, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.6134533842018645, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6067468948089314, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5366839912440952, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.5294368972617042, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.49356707342809414, 'category': 'Рок‑энтузиасты', 'description': ''}, {'score': 0.487426722469645, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.4690525928578297, 'category': 'Любители этнографической музыки', 'description': ''}]}
+2026-02-01 18:27:07,989 | INFO | Update id=240992403 is handled. Duration 202 ms by bot id=8469370108
+2026-02-01 18:27:11,324 | INFO | Обновление статуса пользователя. Исходный статус: [], Событие: [{'score': 0.6976687959765866, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.6694912777457989, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.6573313796276262, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.6134533842018645, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6067468948089314, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.5366839912440952, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.5294368972617042, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.49356707342809414, 'category': 'Рок‑энтузиасты', 'description': ''}, {'score': 0.487426722469645, 'category': 'Фанаты мюзиклов и Бродвея', 'description': ''}, {'score': 0.4690525928578297, 'category': 'Любители этнографической музыки', 'description': ''}], вес: 0.3
+2026-02-01 18:27:11,324 | INFO | Обновлённый статус: [{'category': 'Ценители оперного и вокального искусства', 'score': 0.20930063879297597}, {'category': 'Ценители камерной музыки', 'score': 0.20084738332373966}, {'category': 'Джаз‑адепты', 'score': 0.19719941388828785}, {'category': 'Меломаны‑неоклассики', 'score': 0.18403601526055932}, {'category': 'Романтики‑эстеты', 'score': 0.1820240684426794}, {'category': 'Ностальгирующие романтики', 'score': 0.16100519737322855}, {'category': 'Поклонники стендапа', 'score': 0.15883106917851125}, {'category': 'Рок‑энтузиасты', 'score': 0.14807012202842823}, {'category': 'Фанаты мюзиклов и Бродвея', 'score': 0.1462280167408935}, {'category': 'Любители этнографической музыки', 'score': 0.1407157778573489}]
+2026-02-01 18:27:11,324 | INFO | Пользователь 5312854410 обновил статус после лайка события 222555. Категории: ['Ценители оперного и вокального искусства', 'Ценители камерной музыки', 'Джаз‑адепты', 'Меломаны‑неоклассики', 'Романтики‑эстеты', 'Ностальгирующие романтики', 'Поклонники стендапа', 'Рок‑энтузиасты', 'Фанаты мюзиклов и Бродвея', 'Любители этнографической музыки']
+2026-02-01 18:27:11,463 | INFO | [show_event] attempt=0, current_index=2, len=5
+2026-02-01 18:27:11,463 | INFO | [show_event] Событие №2: {'id': 200299, 'title': 'мастер-класс по живописи акварелью «Маковый рассвет»', 'description': '<p>За два часа опытный художник обучит участников мастер-класса основам акварельной живописи и поможет самостоятельно написать красочную иллюстрацию.</p>', 'start_datetime': 1770027300, 'event_url': 'https://kudago.com/msk/event/obuchenie-maki/', 'status_ml': [{'score': 0.6572228217942218, 'category': 'Любители ботанических иллюстраций', 'description': ''}, {'score': 0.5706360807234664, 'category': 'Любители керамического искусства', 'description': ''}, {'score': 0.5248671607602136, 'category': 'Коллективные творцы', 'description': ''}, {'score': 0.5116432136042162, 'category': 'Поклонники винтажной фотографии', 'description': ''}, {'score': 0.48067257716469736, 'category': 'Фанаты косплея', 'description': ''}, {'score': 0.4751131266046182, 'category': 'Поклонники уличного искусства', 'description': ''}, {'score': 0.4734904497903395, 'category': 'Креативные экспериментаторы', 'description': ''}, {'score': 0.45367450966797884, 'category': 'Фитнес‑энтузиасты с креативным уклоном', 'description': ''}, {'score': 0.4519567308803445, 'category': 'Любители иммерсивного театра', 'description': ''}, {'score': 0.4497183936777234, 'category': 'Любители ландшафтного дизайна', 'description': ''}]}
+2026-02-01 18:27:11,624 | INFO | Update id=240992404 is handled. Duration 296 ms by bot id=8469370108
+2026-02-01 18:27:14,772 | INFO | Обновление статуса пользователя. Исходный статус: [{'category': 'Ценители оперного и вокального искусства', 'score': 0.20930063879297597}, {'category': 'Ценители камерной музыки', 'score': 0.20084738332373966}, {'category': 'Джаз‑адепты', 'score': 0.19719941388828785}, {'category': 'Меломаны‑неоклассики', 'score': 0.18403601526055932}, {'category': 'Романтики‑эстеты', 'score': 0.1820240684426794}, {'category': 'Ностальгирующие романтики', 'score': 0.16100519737322855}, {'category': 'Поклонники стендапа', 'score': 0.15883106917851125}, {'category': 'Рок‑энтузиасты', 'score': 0.14807012202842823}, {'category': 'Фанаты мюзиклов и Бродвея', 'score': 0.1462280167408935}, {'category': 'Любители этнографической музыки', 'score': 0.1407157778573489}], Событие: [{'score': 0.6572228217942218, 'category': 'Любители ботанических иллюстраций', 'description': ''}, {'score': 0.5706360807234664, 'category': 'Любители керамического искусства', 'description': ''}, {'score': 0.5248671607602136, 'category': 'Коллективные творцы', 'description': ''}, {'score': 0.5116432136042162, 'category': 'Поклонники винтажной фотографии', 'description': ''}, {'score': 0.48067257716469736, 'category': 'Фанаты косплея', 'description': ''}, {'score': 0.4751131266046182, 'category': 'Поклонники уличного искусства', 'description': ''}, {'score': 0.4734904497903395, 'category': 'Креативные экспериментаторы', 'description': ''}, {'score': 0.45367450966797884, 'category': 'Фитнес‑энтузиасты с креативным уклоном', 'description': ''}, {'score': 0.4519567308803445, 'category': 'Любители иммерсивного театра', 'description': ''}, {'score': 0.4497183936777234, 'category': 'Любители ландшафтного дизайна', 'description': ''}], вес: 0.3
+2026-02-01 18:27:14,772 | INFO | Обновлённый статус: [{'category': 'Ценители оперного и вокального искусства', 'score': 0.20930063879297597}, {'category': 'Ценители камерной музыки', 'score': 0.20084738332373966}, {'category': 'Джаз‑адепты', 'score': 0.19719941388828785}, {'category': 'Меломаны‑неоклассики', 'score': 0.18403601526055932}, {'category': 'Романтики‑эстеты', 'score': 0.1820240684426794}, {'category': 'Ностальгирующие романтики', 'score': 0.16100519737322855}, {'category': 'Поклонники стендапа', 'score': 0.15883106917851125}, {'category': 'Рок‑энтузиасты', 'score': 0.14807012202842823}, {'category': 'Фанаты мюзиклов и Бродвея', 'score': 0.1462280167408935}, {'category': 'Любители этнографической музыки', 'score': 0.1407157778573489}, {'category': 'Любители ботанических иллюстраций', 'score': 0.19716684653826652}, {'category': 'Любители керамического искусства', 'score': 0.1711908242170399}, {'category': 'Коллективные творцы', 'score': 0.15746014822806406}, {'category': 'Поклонники винтажной фотографии', 'score': 0.15349296408126484}, {'category': 'Фанаты косплея', 'score': 0.1442017731494092}, {'category': 'Поклонники уличного искусства', 'score': 0.14253393798138544}, {'category': 'Креативные экспериментаторы', 'score': 0.14204713493710183}, {'category': 'Фитнес‑энтузиасты с креативным уклоном', 'score': 0.13610235290039366}, {'category': 'Любители иммерсивного театра', 'score': 0.13558701926410335}, {'category': 'Любители ландшафтного дизайна', 'score': 0.13491551810331703}]
+2026-02-01 18:27:14,773 | INFO | Пользователь 5312854410 обновил статус после лайка события 200299. Категории: ['Ценители оперного и вокального искусства', 'Ценители камерной музыки', 'Джаз‑адепты', 'Меломаны‑неоклассики', 'Романтики‑эстеты', 'Ностальгирующие романтики', 'Поклонники стендапа', 'Рок‑энтузиасты', 'Фанаты мюзиклов и Бродвея', 'Любители этнографической музыки', 'Любители ботанических иллюстраций', 'Любители керамического искусства', 'Коллективные творцы', 'Поклонники винтажной фотографии', 'Фанаты косплея', 'Поклонники уличного искусства', 'Креативные экспериментаторы', 'Фитнес‑энтузиасты с креативным уклоном', 'Любители иммерсивного театра', 'Любители ландшафтного дизайна']
+2026-02-01 18:27:14,818 | INFO | [show_event] attempt=0, current_index=3, len=5
+2026-02-01 18:27:14,818 | INFO | [show_event] Событие №3: {'id': 222581, 'title': 'концерт «Камерные вечера»', 'description': '<p>Камерная музыка прозвучит как разговор по душам: рядом — рояль Николая Луганского и тонкая скрипичная линия Никиты Борисоглебского. Встретятся Брамс и редкое «переодевание» секстета в формат трио, а затем — густой фортепианный квинтет, где напряжение растёт от такта к такту.</p>', 'start_datetime': 1771516800, 'event_url': 'https://kudago.com/msk/event/kontsert-kamernyie-vechera-k0k1ug/', 'status_ml': [{'score': 0.7227001418998424, 'category': 'Ценители оперного и вокального искусства', 'description': ''}, {'score': 0.7225280197056647, 'category': 'Джаз‑адепты', 'description': ''}, {'score': 0.7043104753134022, 'category': 'Ценители камерной музыки', 'description': ''}, {'score': 0.6640214768991279, 'category': 'Меломаны‑неоклассики', 'description': ''}, {'score': 0.6504436406495585, 'category': 'Романтики‑эстеты', 'description': ''}, {'score': 0.6130731577632877, 'category': 'Ностальгирующие романтики', 'description': ''}, {'score': 0.6041043687856947, 'category': 'Поклонники стендапа', 'description': ''}, {'score': 0.5870473876551463, 'category': 'Рок‑энтузиасты', 'description': ''}, {'score': 0.5869775275183035, 'category': 'Nostalgia‑поколение', 'description': ''}, {'score': 0.5742508669652523, 'category': 'Любители этнографической музыки', 'description': ''}]}
+2026-02-01 18:27:14,892 | INFO | Update id=240992405 is handled. Duration 125 ms by bot id=8469370108

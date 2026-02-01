@@ -1,9 +1,9 @@
 import psycopg2
 import json
 from config import Config
-from typing import List
+from typing import List, Optional
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from datetime import timedelta
 import time
 import pytz  # Для явного указания часового пояса
@@ -22,40 +22,6 @@ logger = logging.getLogger(__name__)
 class Database_Users:
     def __init__(self):
         self.conn = psycopg2.connect(Config.DB_DSN)
-
-    # def create_table(self):
-
-    #     if not self.conn:
-    #         self.conn = psycopg2.connect(Config.DB_DSN)
-
-    #     try:
-    #         with self.conn.cursor() as cur:
-    #             cur.execute("""
-    #                 CREATE TABLE IF NOT EXISTS users (
-    #                     id BIGINT PRIMARY KEY,
-    #                     city INTEGER,
-    #                     status_ml JSONB DEFAULT '[]',
-    #                     event_history JSONB DEFAULT '[]'
-    #                     );
-    #                 """)
-    # # 1 - msk
-    # # 2 - spb
-    # # 3 - msk & spb
-
-
-    #         self.conn.commit()
-    #         print("Table created successfully (if not already present).")
-
-    #     except psycopg2.Error as e:
-    #         print(f"Database error: {e}")
-    #         if self.conn:
-    #             self.conn.rollback()
-
-    #     except Exception as e:
-    #         print(f"!Unexpected error: {e}")
-    #         if self.conn:
-    #             self.conn.rollback()
-
 
 
     def get_user(self, user_id: int):
@@ -195,3 +161,200 @@ class Database_Users:
             }
             for r in rows
         ]
+    
+
+
+    # --- Реферальная система ---
+
+    def save_referral_code(self, user_id: int, code: str) -> bool:
+        """Сохраняет реферальный код пользователя, если его ещё нет."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users 
+                    SET referral_code = %s
+                    WHERE id = %s AND referral_code IS NULL
+                    """,
+                    (code, user_id)
+                )
+                # Если строка обновлена (т.е. код был установлен)
+                if cur.rowcount > 0:
+                    self.conn.commit()
+                    logger.info(f"Реферальный код {code} сохранён для пользователя {user_id}")
+                    return True
+                else:
+                    logger.info(f"У пользователя {user_id} уже есть реферальный код")
+                    return False
+        except Exception as e:
+            logger.error(f"Ошибка при сохранении реферального кода для {user_id}: {e}")
+            self.conn.rollback()
+            return False
+
+    def get_user_by_referral_code(self, code: str) -> Optional[int]:
+        """Возвращает ID пользователя по реферальном коду."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id FROM users WHERE referral_code = %s",
+                    (code,)
+                )
+                row = cur.fetchone()
+                return row[0] if row else None
+        except Exception as e:
+            logger.error(f"Ошибка при поиске пользователя по коду {code}: {e}")
+            return None
+
+    def is_already_referred(self, user_id: int, referrer_id: int) -> bool:
+        """Проверяет, был ли пользователь уже приглашён этим реферером."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT 1 FROM referrals
+                    WHERE referred_id = %s AND referrer_id = %s
+                    """,
+                    (user_id, referrer_id)
+                )
+                return cur.fetchone() is not None
+        except Exception as e:
+            logger.error(f"Ошибка при проверке реферального статуса {user_id}: {e}")
+            return False
+
+    def add_referral(self, user_id: int, referrer_id: int, code: str) -> bool:
+        """Добавляет запись о реферале в БД."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO referrals (referrer_id, referred_id, referral_code)
+                    VALUES (%s, %s, %s)
+                    """,
+                    (referrer_id, user_id, code)
+                )
+            self.conn.commit()
+            logger.info(f"Реферальный переход: {referrer_id} → {user_id} (код {code})")
+            return True
+        except Exception as e:
+            logger.error(f"Ошибка при добавлении реферала {user_id}: {e}")
+            self.conn.rollback()
+
+    def get_upcoming_confirmed(self, days_ahead: int = 1) -> list:
+
+        try:
+            # Расчёт временного интервала
+            now = datetime.now(timezone.utc)
+            target_start = now + timedelta(days=days_ahead - 0.1)
+            target_end = now + timedelta(days=days_ahead + 0.1)
+
+            start_ts = int(target_start.timestamp())
+            end_ts = int(target_end.timestamp())
+
+            with self.conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        uce.user_id,
+                        e.event_id,
+                        e.title,
+                        e.start_datetime,
+                        e.event_url,
+                        e.city
+                    FROM user_confirmed_events uce
+                    JOIN (
+                        -- Объединяем события из msk и spb
+                        SELECT 
+                            id AS event_id,
+                            title,
+                            start_datetime,
+                            event_url,
+                            'msk' AS city
+                        FROM msk
+                        UNION ALL
+                        SELECT
+                            id AS event_id,
+                            title,
+                            start_datetime,
+                            event_url,
+                            'spb' AS city
+                        FROM spb
+                    ) e ON uce.event_id = e.event_id
+                    WHERE e.start_datetime BETWEEN %s AND %s
+                    AND uce.reminder_sent = FALSE
+                    ORDER BY e.start_datetime
+                    """, (start_ts, end_ts))
+
+                rows = cur.fetchall()
+                return [
+                    {
+                        "user_id": r[0],
+                        "event_id": r[1],
+                        "title": r[2],
+                        "start_datetime": r[3],
+                        "event_url": r[4],
+                        "city": r[5]
+                    }
+                    for r in rows
+                ]
+        except Exception as e:
+            logger.error(f"[DB] Ошибка при получении подтверждённых мероприятий: {e}")
+            return []
+        
+
+    def confirm_event(self, user_id: int, event_id: int) -> bool:
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO user_confirmed_events (user_id, event_id, confirmed_at, reminder_sent)
+                    VALUES (%s, %s, %s, FALSE)
+                    ON CONFLICT (user_id, event_id) DO NOTHING
+                    """,
+                    (user_id, event_id, datetime.now(timezone.utc))
+                )
+            self.conn.commit()
+            return True
+        except Exception as e:
+            logger.error(f"[DB] Ошибка подтверждения мероприятия {event_id} для {user_id}: {e}")
+            return False
+        
+    def mark_reminder_sent(self, user_id: int, event_id: int) -> bool:
+        """Помечает, что напоминание для пользователя и мероприятия уже отправлено."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE user_confirmed_events
+                    SET reminder_sent = TRUE
+                    WHERE user_id = %s AND event_id = %s
+                    """,
+                    (user_id, event_id)
+                )
+                self.conn.commit()
+                return cur.rowcount > 0
+        except Exception as e:
+            logger.error(f"[DB] Ошибка отметки отправленного напоминания: {e}")
+            return False
+        
+    
+    def get_event_by_id(self, event_id: int, table_name: str) -> Optional[dict]:
+        """Возвращает данные мероприятия по ID из указанной таблицы."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(f"""
+                    SELECT id, title, description, start_datetime, event_url
+                    FROM {table_name}
+                    WHERE id = %s
+                    """, (event_id,))
+                row = cur.fetchone()
+                if row:
+                    return {
+                        "id": row[0],
+                        "title": row[1],
+                        "description": row[2],
+                        "start_datetime": row[3],
+                        "event_url": row[4]
+                    }
+                return None
+        except Exception as e:
+            logger.error(f"[DB] Ошибка получения мероприятия {event_id}: {e}")
+            return None

@@ -12,3 +12,4 @@ huggingface_hub[hf_xet]
 aiogram==3.12.0
 pandas
 pytz
+apscheduler

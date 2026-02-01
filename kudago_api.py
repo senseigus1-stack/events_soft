@@ -48,6 +48,64 @@ class Event:
     disable_comments: bool           # from "disable_comments"
     periods: List[Dict[str, int]] = field(default_factory=list)  # [{"start": 123, "end": 456}, ...]
 
+@dataclass
+class Place:
+    """Модель места (place) из API KudaGo"""
+    id: int
+    title: str
+    slug: str
+    address: str
+    timetable: str
+    phone: str
+    is_stub: bool
+    body_text: str
+    description: str
+    site_url: str
+    foreign_url: str
+    lat: float
+    lon: float
+    subway: str
+    favorites_count: int
+    images: List[Dict[str, Any]]  # Список словарей с полями image, source
+    comments_count: int
+    is_closed: bool
+    categories: List[str]
+    short_title: str
+    tags: List[str]
+    location: str
+    age_restriction: Optional[str]  # Может быть null
+    disable_comments: bool
+    has_parking_lot: bool
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Преобразует объект в словарь (удобно для сохранения в БД или JSON)."""
+        return {
+            "id": self.id,
+            "title": self.title,
+            "slug": self.slug,
+            "address": self.address,
+            "timetable": self.timetable,
+            "phone": self.phone,
+            "is_stub": self.is_stub,
+            "body_text": self.body_text,
+            "description": self.description,
+            "site_url": self.site_url,
+            "foreign_url": self.foreign_url,
+            "lat": self.lat,
+            "lon": self.lon,
+            "subway": self.subway,
+            "favorites_count": self.favorites_count,
+            "images": self.images,
+            "comments_count": self.comments_count,
+            "is_closed": self.is_closed,
+            "categories": self.categories,
+            "short_title": self.short_title,
+            "tags": self.tags,
+            "location": self.location,
+            "age_restriction": self.age_restriction,
+            "disable_comments": self.disable_comments,
+            "has_parking_lot": self.has_parking_lot
+        }
 
 class KudaGoAPI:
     def __init__(self, base_url: str = "https://kudago.com/public-api/v1.4"):
@@ -210,24 +268,68 @@ class Database:
 
 
         query3 = """
+
                     CREATE TABLE IF NOT EXISTS users (
                         id BIGINT PRIMARY KEY,
                         name VARCHAR(255),
-                        city INTEGER,
+                        city INTEGER,  -- 1 — msk, 2 — spb, 3 — msk & spb
                         status_ml JSONB DEFAULT '[]',
-                        event_history JSONB DEFAULT '[]'
-                        );
+                        event_history JSONB DEFAULT '[]',
+                        referral_code VARCHAR(50),
+
+
+                        CONSTRAINT uk_referral_code UNIQUE (referral_code)
+                    );
                     """
     # 1 - msk
     # 2 - spb
     # 3 - msk & spb
 
 
+        query4 = """
+                CREATE TABLE IF NOT EXISTS referrals (
+                    id SERIAL PRIMARY KEY,
+                    referrer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    referred_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    referral_code VARCHAR(50) UNIQUE NOT NULL,
+                    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    reward_status VARCHAR(20) DEFAULT 'pending'  -- pending, completed, cancelled
+                    
+
+                );
+        """
+
+        query5 = """
+                    CREATE TABLE IF NOT EXISTS friends (
+                        user_id BIGINT NOT NULL,
+                        friend_id BIGINT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (user_id, friend_id),
+                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                        FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
+
+                    );
+                    
+                """
+
+        query6 = """
+                    CREATE TABLE IF NOT EXISTS user_confirmed_events (
+                        user_id       BIGINT NOT NULL,
+                        event_id      BIGINT NOT NULL,
+                        confirmed_at  TIMESTAMPTZ DEFAULT NOW(),
+                        reminder_sent BOOLEAN DEFAULT FALSE,
+                        PRIMARY KEY (user_id, event_id),
+                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                    );
+                    """
+
         with self.connection.cursor() as cursor:
             cursor.execute(query1)
             cursor.execute(query2)
             cursor.execute(query3)
-        
+            cursor.execute(query4)
+            cursor.execute(query5)
+            cursor.execute(query6)
         self.connection.commit()
         
     def save_events(self, city: str, events: List[Event]):
@@ -263,29 +365,31 @@ class Database:
             %s, %s, %s, %s, %s,
             %s, %s
         )
-        ON CONFLICT (id) DO UPDATE SET
-            title = EXCLUDED.title,
-            description = EXCLUDED.description,
-            place_name = EXCLUDED.place_name,
-            address = EXCLUDED.address,
-            event_url = EXCLUDED.event_url,
-            image_url = EXCLUDED.image_url,
-            start_datetime = EXCLUDED.start_datetime,
-            end_datetime = EXCLUDED.end_datetime,
-            category = EXCLUDED.category,
-            status = EXCLUDED.status,
-            publication_date = EXCLUDED.publication_date,
-            slug = EXCLUDED.slug,
-            age_restriction = EXCLUDED.age_restriction,
-            price = EXCLUDED.price,
-            is_free = EXCLUDED.is_free,
-            tags = EXCLUDED.tags,
-            favorites_count = EXCLUDED.favorites_count,
-            comments_count = EXCLUDED.comments_count,
-            short_title = EXCLUDED.short_title,
-            disable_comments = EXCLUDED.disable_comments,
-            status_ml = EXCLUDED.status_ml
-        """
+         ON CONFLICT (id) DO NOTHING
+          
+        """ #UPDATE SET
+        #     title = EXCLUDED.title,
+        #     description = EXCLUDED.description,
+        #     place_name = EXCLUDED.place_name,
+        #     address = EXCLUDED.address,
+        #     event_url = EXCLUDED.event_url,
+        #     image_url = EXCLUDED.image_url,
+        #     start_datetime = EXCLUDED.start_datetime,
+        #     end_datetime = EXCLUDED.end_datetime,
+        #     category = EXCLUDED.category,
+        #     status = EXCLUDED.status,
+        #     publication_date = EXCLUDED.publication_date,
+        #     slug = EXCLUDED.slug,
+        #     age_restriction = EXCLUDED.age_restriction,
+        #     price = EXCLUDED.price,
+        #     is_free = EXCLUDED.is_free,
+        #     tags = EXCLUDED.tags,
+        #     favorites_count = EXCLUDED.favorites_count,
+        #     comments_count = EXCLUDED.comments_count,
+        #     short_title = EXCLUDED.short_title,
+        #     disable_comments = EXCLUDED.disable_comments,
+        #     status_ml = EXCLUDED.status_ml
+        
 
         with self.connection.cursor() as cursor:
             for event in events:
@@ -315,44 +419,72 @@ class Database:
                 ))
         self.connection.commit()
 
-    def get_all_events(self, city:str) -> List[Dict]:
-        table_name = city.lower().replace("-", "_")
+    def get_all_events(self, cities: List[str]) -> List[Dict]:
+        """
+        Получает все события для указанных городов.
+        
+        Args:
+            cities (List[str]): Список городов (например, ["msk", "spb"]).
+        
+        Returns:
+            List[Dict]: Список событий со всеми полями.
+        """
         all_events = []
-
-        with self.connection.cursor() as cursor:
-            cursor.execute(f"""
-                SELECT {table_name}
-                FROM information_schema.tables
-                WHERE table_schema = 'public'
-                AND table_name NOT LIKE 'pg_%'
-                AND table_name NOT IN ('schema_migrations')
-            """)
-            tables = cursor.fetchall()
-
-        for table in tables:
-            table_name = table[0]
-            query = f"""
-                SELECT
-                    '{table_name}' AS city,
-                    title,
-                    description,
-                    place_name,
-                    address,
-                    event_url,
-                    image_url,
-                    start_datetime,
-                    end_datetime,
-                    category,
-                    status
-                FROM {table_name}
-                ORDER BY start_datetime
-            """
-
-            with self.connection.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(query)
-                events = cursor.fetchall()
-                all_events.extend(events)
-
+        
+        with self.connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            for city in cities:
+                table_name = city.lower().replace("-", "_")
+                
+                # Проверяем, существует ли таблица для города
+                cursor.execute(
+                    """
+                    SELECT 1 FROM information_schema.tables 
+                    WHERE table_schema = 'public'
+                    AND table_name = %s
+                    """,
+                    (table_name,)
+                )
+                if not cursor.fetchone():
+                    logging.warning(f"Таблица {table_name} не найдена. Пропускаем.")
+                    continue
+                
+                # Выполняем запрос к таблице города
+                query = f"""
+                    SELECT
+                        '{city}' AS city,
+                        id,
+                        title,
+                        description,
+                        place_name,
+                        address,
+                        event_url,
+                        image_url,
+                        start_datetime,
+                        end_datetime,
+                        category,
+                        status,
+                        publication_date,
+                        slug,
+                        age_restriction,
+                        price,
+                        is_free,
+                        tags,
+                        favorites_count,
+                        comments_count,
+                        short_title,
+                        disable_comments,
+                        status_ml
+                    FROM {table_name}
+                    ORDER BY start_datetime
+                """
+                
+                try:
+                    cursor.execute(query)
+                    events = cursor.fetchall()
+                    all_events.extend(events)
+                except Exception as e:
+                    logging.error(f"Ошибка при запросе к таблице {table_name}: {e}")
+        
         return all_events
 
     def save_event_periods(self, event_id: int, periods: List[Dict[str, int]], city:str) -> None:
