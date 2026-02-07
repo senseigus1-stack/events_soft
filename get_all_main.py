@@ -1,6 +1,6 @@
 import logging
 import os
-from kudago_api import EventManager
+from kudago import EventManager
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -33,8 +33,8 @@ if __name__ == "__main__":
             api_base_url="https://kudago.com/public-api/v1.4",
             clusters_path=clusters_path  # используем переменную
         )
-
-        manager.sync_events(cities=CITIES, limit=50)
+        manager.sync_places(cities=CITIES, limit=2000)
+        manager.sync_events(cities=CITIES, limit=1000)
         upcoming = manager.get_upcoming_events_periods(cities=CITIES)
         print(upcoming)
 

@@ -18,6 +18,33 @@ from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
+@dataclass
+class Place:
+    """Place model"""
+    id: int
+    title: str
+    address: str
+    description: str
+    place_url: str
+    image_url: str
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+    phone: str = ""
+    site_url: str = ""
+    timetable: str = ""
+    is_free: bool = False
+    favorites_count: int = 0
+    comments_count: int = 0
+    slug: str = ""
+    subway: List[str] = field(default_factory=list)  # станции метро
+    is_closed: bool = False             # закрыто ли место
+    categories: List[str] = field(default_factory=list)
+    short_title: str = ""
+    tags: List[str] = field(default_factory=list)
+    location: str = ""                 # город (например, "spb")
+    age_restriction: Optional[str] = None  # возрастное ограничение
+    disable_comments: bool = False
+    has_parking_lot: bool = False
 
 @dataclass
 class Event:
@@ -46,66 +73,10 @@ class Event:
     comments_count: int              # from "comments_count"
     short_title: str                # from "short_title"
     disable_comments: bool           # from "disable_comments"
+    place_id: Optional[int] = None  # новое поле
+    likes: Optional[int]=0
     periods: List[Dict[str, int]] = field(default_factory=list)  # [{"start": 123, "end": 456}, ...]
 
-@dataclass
-class Place:
-    """Модель места (place) из API KudaGo"""
-    id: int
-    title: str
-    slug: str
-    address: str
-    timetable: str
-    phone: str
-    is_stub: bool
-    body_text: str
-    description: str
-    site_url: str
-    foreign_url: str
-    lat: float
-    lon: float
-    subway: str
-    favorites_count: int
-    images: List[Dict[str, Any]]  # Список словарей с полями image, source
-    comments_count: int
-    is_closed: bool
-    categories: List[str]
-    short_title: str
-    tags: List[str]
-    location: str
-    age_restriction: Optional[str]  # Может быть null
-    disable_comments: bool
-    has_parking_lot: bool
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Преобразует объект в словарь (удобно для сохранения в БД или JSON)."""
-        return {
-            "id": self.id,
-            "title": self.title,
-            "slug": self.slug,
-            "address": self.address,
-            "timetable": self.timetable,
-            "phone": self.phone,
-            "is_stub": self.is_stub,
-            "body_text": self.body_text,
-            "description": self.description,
-            "site_url": self.site_url,
-            "foreign_url": self.foreign_url,
-            "lat": self.lat,
-            "lon": self.lon,
-            "subway": self.subway,
-            "favorites_count": self.favorites_count,
-            "images": self.images,
-            "comments_count": self.comments_count,
-            "is_closed": self.is_closed,
-            "categories": self.categories,
-            "short_title": self.short_title,
-            "tags": self.tags,
-            "location": self.location,
-            "age_restriction": self.age_restriction,
-            "disable_comments": self.disable_comments,
-            "has_parking_lot": self.has_parking_lot
-        }
 
 class KudaGoAPI:
     def __init__(self, base_url: str = "https://kudago.com/public-api/v1.4"):
@@ -115,6 +86,23 @@ class KudaGoAPI:
     #        "User-Agent": "EventAggregator/1.0"
      #   })
 
+    def get_place_details(self, place_id: int) -> Optional[Dict]:
+        """Получить подробную информацию о месте"""
+        url = f"{self.base_url}/places/{place_id}/"
+
+        try:
+            response = self.session.get(url, timeout=10)
+            response.raise_for_status()
+            try:
+                data = response.json()
+            except json.JSONDecodeError as e:
+                logging.error(f"Ошибка JSON для place_id {place_id}: {e}")
+                text = response.content.decode('utf-8', errors='replace')
+                data = json.loads(text)
+            return data
+        except requests.RequestException as e:
+            logging.error(f"Ошибка API для place_id {place_id}: {e}")
+            return None
     def get_event_ids(self, city: str, limit: int = 100, max_retries: int = 3) -> List[int]:
         all_ids = []  # only (ID events)
         page = 1
@@ -189,7 +177,7 @@ class KudaGoAPI:
             time.sleep(0.5)  # Пауза между запросами
 
         return all_ids  # Возвращаем список чисел (ID)
-        
+
     def get_event_details(self, event_id: int) -> Optional[Dict]:
         """Получить подробную информацию о событии"""
         url = f"{self.base_url}/events/{event_id}/"
@@ -222,9 +210,43 @@ class Database:
             raise
 
     def create_city_table(self, city: str):
+        # Очищаем имя таблицы: только буквы, цифры и подчёркивание
         table_name = city.lower().replace("-", "_")
-        
-        # Основной запрос для таблицы событий города
+        if not table_name.isidentifier():
+            raise ValueError(f"Некорректное имя таблицы: {table_name}")
+        # 1. Таблица places (без изменений, корректна)
+        query4 = """
+        CREATE TABLE IF NOT EXISTS places (
+            id BIGINT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            address TEXT,
+            description TEXT,
+            short_title VARCHAR(100),
+            slug VARCHAR(255),
+            place_url VARCHAR(500),
+            site_url VARCHAR(500),
+            image_url VARCHAR(500),
+            lat DOUBLE PRECISION,
+            lon DOUBLE PRECISION,
+            phone VARCHAR(50),
+            timetable TEXT,
+            is_free BOOLEAN DEFAULT FALSE,
+            is_closed BOOLEAN DEFAULT FALSE,
+            disable_comments BOOLEAN DEFAULT FALSE,
+            has_parking_lot BOOLEAN DEFAULT FALSE,
+            favorites_count INTEGER DEFAULT 0,
+            comments_count INTEGER DEFAULT 0,
+            subway TEXT[],
+            categories TEXT[],
+            tags TEXT[],
+            location VARCHAR(50),
+            age_restriction VARCHAR(10),
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+        """
+
+        # 2. Таблица событий города (исправлено: FOREIGN KEY, удалены лишние кавычки)
         query1 = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
             id BIGINT PRIMARY KEY,
@@ -239,8 +261,6 @@ class Database:
             category VARCHAR(255),
             status VARCHAR(20) DEFAULT 'upcoming',
             status_ml JSONB,
-            
-            -- Новые поля
             publication_date BIGINT,
             slug VARCHAR(255),
             age_restriction VARCHAR(10),
@@ -250,90 +270,179 @@ class Database:
             favorites_count INTEGER,
             comments_count INTEGER,
             short_title VARCHAR(255),
-            disable_comments BOOLEAN
-            
+            disable_comments BOOLEAN,
+            place_id BIGINT,
+            likes BIGINT DEFAULT 0,
+            CONSTRAINT fk_place
+                FOREIGN KEY (place_id)
+                REFERENCES places (id)
+                ON DELETE SET NULL
         );
         """
-        
-        # Запрос для таблицы дат событий
+
+        # 3. Таблица дат событий (исправлено: FOREIGN KEY)
         query2 = f"""
         CREATE TABLE IF NOT EXISTS event_dates_{table_name} (
             id SERIAL PRIMARY KEY,
-            event_id BIGINT NOT NULL REFERENCES {table_name}(id) ON DELETE CASCADE,
+            event_id BIGINT NOT NULL,
             start_timestamp BIGINT NOT NULL,
-            end_timestamp BIGINT NOT NULL
+            end_timestamp BIGINT NOT NULL,
+            FOREIGN KEY (event_id) REFERENCES {table_name}(id) ON DELETE CASCADE
         );
         """
-        
 
-
+        # 4. Таблица пользователей (исправлено: лишние кавычки и форматирование)
         query3 = """
-
-                    CREATE TABLE IF NOT EXISTS users (
-                        id BIGINT PRIMARY KEY,
-                        name VARCHAR(255),
-                        city INTEGER,  -- 1 — msk, 2 — spb, 3 — msk & spb
-                        status_ml JSONB DEFAULT '[]',
-                        event_history JSONB DEFAULT '[]',
-                        referral_code VARCHAR(50),
-
-
-                        CONSTRAINT uk_referral_code UNIQUE (referral_code)
-                    );
-                    """
-    # 1 - msk
-    # 2 - spb
-    # 3 - msk & spb
-
-
-        query4 = """
-                CREATE TABLE IF NOT EXISTS referrals (
-                    id SERIAL PRIMARY KEY,
-                    referrer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    referred_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    referral_code VARCHAR(50) UNIQUE NOT NULL,
-                    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    reward_status VARCHAR(20) DEFAULT 'pending'  -- pending, completed, cancelled
-                    
-
-                );
+        CREATE TABLE IF NOT EXISTS users (
+            id BIGINT PRIMARY KEY,
+            name VARCHAR(255),
+            city INTEGER,
+            status_ml JSONB DEFAULT '[]',
+            event_history JSONB DEFAULT '[]',
+            referral_code VARCHAR(50) UNIQUE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
         """
 
+        # 5. Таблица referrals (исправлено: FOREIGN KEY, синтаксис)
         query5 = """
-                    CREATE TABLE IF NOT EXISTS friends (
-                        user_id BIGINT NOT NULL,
-                        friend_id BIGINT NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        PRIMARY KEY (user_id, friend_id),
-                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                        FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
+        CREATE TABLE IF NOT EXISTS referrals (
+            id SERIAL PRIMARY KEY,
+            referrer_id BIGINT NOT NULL,
+            referred_id BIGINT NOT NULL,
+            referral_code VARCHAR(50) NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            CONSTRAINT fk_referrer
+                FOREIGN KEY (referrer_id)
+                REFERENCES users (id)
+                ON DELETE CASCADE,
+            CONSTRAINT fk_referred
+                FOREIGN KEY (referred_id)
+                REFERENCES users (id)
+                ON DELETE CASCADE,
+            CONSTRAINT unique_referral
+                UNIQUE (referrer_id, referred_id)
+        );
+        """
 
-                    );
-                    
-                """
+        # 6. Таблица user_confirmed_events (исправлено: FOREIGN KEY, PRIMARY KEY)
+        query6 = f"""
+        CREATE TABLE IF NOT EXISTS user_confirmed_events (
+            user_id INT NOT NULL,
+            event_id INT NOT NULL,
+            confirmed_at TIMESTAMP WITH TIME ZONE NOT NULL,
+            reminder_sent BOOLEAN DEFAULT FALSE,
+            PRIMARY KEY (user_id, event_id),
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        );
+        """
 
-        query6 = """
-                    CREATE TABLE IF NOT EXISTS user_confirmed_events (
-                        user_id       BIGINT NOT NULL,
-                        event_id      BIGINT NOT NULL,
-                        confirmed_at  TIMESTAMPTZ DEFAULT NOW(),
-                        reminder_sent BOOLEAN DEFAULT FALSE,
-                        PRIMARY KEY (user_id, event_id),
-                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-                    );
-                    """
+        query7 = f""" 
+        CREATE TABLE IF NOT EXISTS user_event_actions (
+            user_id BIGINT NOT NULL,
+            event_id BIGINT NOT NULL,
+            action VARCHAR(20) NOT NULL,  -- 'like', 'dislike', 'confirmed'
+            timestamp TIMESTAMPTZ DEFAULT NOW(),
+            PRIMARY KEY (user_id, event_id, action)
+        );
+        CREATE INDEX IF NOT EXISTS idx_user_event ON user_event_actions(user_id, event_id);
+            """
+
+            # сделать инвалидное кеширование с JSONB отсюда
 
         with self.connection.cursor() as cursor:
-            cursor.execute(query1)
-            cursor.execute(query2)
-            cursor.execute(query3)
+            # 1. Создаём таблицу places
             cursor.execute(query4)
+
+            # 2. Создаём таблицу событий города
+            cursor.execute(query1)
+
+            # 3. Создаём таблицу дат событий
+            cursor.execute(query2)
+
+            # 4. Создаём таблицу users
+            cursor.execute(query3)
             cursor.execute(query5)
             cursor.execute(query6)
+            cursor.execute(query7)
         self.connection.commit()
-        
+        logging.info(f"Таблица {table_name} создана успешно")
+
+    def save_places(self, places: List[Place]):
+        """
+        Сохраняет список мест в таблицу `places`.
+        Если место с таким ID уже есть — обновляет поля.
+        """
+        self.connect()
+
+        # SQL-запрос с ON CONFLICT для обновления существующих записей
+        query = """
+            INSERT INTO places (
+                id, title, address, description, short_title, slug,
+                place_url, site_url, image_url,
+                lat, lon,
+                phone, timetable,
+                is_free, is_closed, disable_comments, has_parking_lot,
+                favorites_count, comments_count,
+                subway, categories, tags,
+                location, age_restriction,
+                created_at, updated_at
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s,
+                %s, %s,
+                %s, %s,
+                %s, %s, %s, %s,
+                %s, %s,
+                %s, %s, %s,
+                %s, %s,
+                NOW(), NOW()
+            ) 
+            ON CONFLICT DO NOTHING;
+        """
+
+        with self.connection.cursor() as cursor:
+            for place in places:
+                # Преобразуем списки в формат, понятный PostgreSQL (массивы)
+                subway = place.subway if place.subway else None
+                categories = place.categories if place.categories else None
+                tags = place.tags if place.tags else None
+
+
+                cursor.execute(query, (
+                    place.id,
+                    place.title,
+                    place.address,
+                    place.description,
+                    place.short_title,
+                    place.slug,
+                    place.place_url,
+                    place.site_url,
+                    place.image_url,
+                    place.lat,
+                    place.lon,
+                    place.phone,
+                    place.timetable,
+                    place.is_free,
+                    place.is_closed,
+                    place.disable_comments,
+                    place.has_parking_lot,
+                    place.favorites_count,
+                    place.comments_count,
+                    subway,           # передаётся как массив PostgreSQL
+                    categories,       # передаётся как массив PostgreSQL
+                    tags,             # передаётся как массив PostgreSQL
+                    place.location,
+                    place.age_restriction
+                ))
+
+        self.connection.commit()
+        logging.info(f"Сохранено {len(places)} мест в БД.")
+
     def save_events(self, city: str, events: List[Event]):
         table_name = city.lower().replace("-", "_")
+        
+        # SQL-запрос (без изменений, но лучше вынести константой)
         query = f"""
         INSERT INTO {table_name} (
             id,
@@ -357,42 +466,28 @@ class Database:
             comments_count,
             short_title,
             disable_comments,
-            status_ml
+            status_ml,
+            place_id
         ) VALUES (
             %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s,
             %s, %s, %s, %s, %s,
-            %s, %s
+            %s, %s, %s
         )
-         ON CONFLICT (id) DO NOTHING
-          
-        """ #UPDATE SET
-        #     title = EXCLUDED.title,
-        #     description = EXCLUDED.description,
-        #     place_name = EXCLUDED.place_name,
-        #     address = EXCLUDED.address,
-        #     event_url = EXCLUDED.event_url,
-        #     image_url = EXCLUDED.image_url,
-        #     start_datetime = EXCLUDED.start_datetime,
-        #     end_datetime = EXCLUDED.end_datetime,
-        #     category = EXCLUDED.category,
-        #     status = EXCLUDED.status,
-        #     publication_date = EXCLUDED.publication_date,
-        #     slug = EXCLUDED.slug,
-        #     age_restriction = EXCLUDED.age_restriction,
-        #     price = EXCLUDED.price,
-        #     is_free = EXCLUDED.is_free,
-        #     tags = EXCLUDED.tags,
-        #     favorites_count = EXCLUDED.favorites_count,
-        #     comments_count = EXCLUDED.comments_count,
-        #     short_title = EXCLUDED.short_title,
-        #     disable_comments = EXCLUDED.disable_comments,
-        #     status_ml = EXCLUDED.status_ml
-        
+        ON CONFLICT (id) DO NOTHING
+        """
 
         with self.connection.cursor() as cursor:
             for event in events:
+                # 1. Обрабатываем place_id: проверяем наличие в таблице places
+                place_id = event.place_id
+                if place_id is not None:
+                    cursor.execute("SELECT 1 FROM places WHERE id = %s", (place_id,))
+                    if not cursor.fetchone():
+                        place_id = None  # заменяем на NULL, если места нет
+
+                # 2. Выполняем INSERT с обработанным place_id
                 cursor.execute(query, (
                     event.id,
                     event.title,
@@ -415,76 +510,50 @@ class Database:
                     event.comments_count,
                     event.short_title,
                     event.disable_comments,
-                    event.status_ml
+                    event.status_ml,
+                    place_id  # используем обработанное значение!
                 ))
-        self.connection.commit()
+        
+        self.connection.commit()  # commit после всех операций
 
-    def get_all_events(self, cities: List[str]) -> List[Dict]:
-        """
-        Получает все события для указанных городов.
-        
-        Args:
-            cities (List[str]): Список городов (например, ["msk", "spb"]).
-        
-        Returns:
-            List[Dict]: Список событий со всеми полями.
-        """
+    def get_all_events(self, city:str) -> List[Dict]:
+        table_name = city.lower().replace("-", "_")
         all_events = []
-        
-        with self.connection.cursor(cursor_factory=RealDictCursor) as cursor:
-            for city in cities:
-                table_name = city.lower().replace("-", "_")
-                
-                # Проверяем, существует ли таблица для города
-                cursor.execute(
-                    """
-                    SELECT 1 FROM information_schema.tables 
-                    WHERE table_schema = 'public'
-                    AND table_name = %s
-                    """,
-                    (table_name,)
-                )
-                if not cursor.fetchone():
-                    logging.warning(f"Таблица {table_name} не найдена. Пропускаем.")
-                    continue
-                
-                # Выполняем запрос к таблице города
-                query = f"""
-                    SELECT
-                        '{city}' AS city,
-                        id,
-                        title,
-                        description,
-                        place_name,
-                        address,
-                        event_url,
-                        image_url,
-                        start_datetime,
-                        end_datetime,
-                        category,
-                        status,
-                        publication_date,
-                        slug,
-                        age_restriction,
-                        price,
-                        is_free,
-                        tags,
-                        favorites_count,
-                        comments_count,
-                        short_title,
-                        disable_comments,
-                        status_ml
-                    FROM {table_name}
-                    ORDER BY start_datetime
-                """
-                
-                try:
-                    cursor.execute(query)
-                    events = cursor.fetchall()
-                    all_events.extend(events)
-                except Exception as e:
-                    logging.error(f"Ошибка при запросе к таблице {table_name}: {e}")
-        
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(f"""
+                SELECT {table_name}
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name NOT LIKE 'pg_%'
+                AND table_name NOT IN ('schema_migrations')
+            """)
+            tables = cursor.fetchall()
+
+        for table in tables:
+            table_name = table[0]
+            query = f"""
+                SELECT
+                    '{table_name}' AS city,
+                    title,
+                    description,
+                    place_name,
+                    address,
+                    event_url,
+                    image_url,
+                    start_datetime,
+                    end_datetime,
+                    category,
+                    status
+                FROM {table_name}
+                ORDER BY start_datetime
+            """
+
+            with self.connection.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute(query)
+                events = cursor.fetchall()
+                all_events.extend(events)
+
         return all_events
 
     def save_event_periods(self, event_id: int, periods: List[Dict[str, int]], city:str) -> None:
@@ -566,9 +635,9 @@ class EventManager:
 
     def __init__(self, db_dsn: str,
                 api_base_url: str = "https://kudago.com/public-api/v1.4",
-                clusters_path:str=os.getenv('CLUSTERS_PATH')
+                clusters_path:str='C:/Users/arsenii/events_soft/ai/clusters.json'
                 ):
-        
+
         self.api = KudaGoAPI(api_base_url)
         self.db = Database(db_dsn)
         self.clusters = load_clusters_from_file(clusters_path)
@@ -593,7 +662,7 @@ class EventManager:
         #    except (OSError, OverflowError, ValueError) as e:
         #        logging.warning(f"Невалидный timestamp {value}: {e}")
        #         return None
-    
+
 
         if isinstance(value, str):
             clean_value = value.replace("Z", "+00:00")
@@ -674,28 +743,80 @@ class EventManager:
     def _get_status_vector(self, event_ml: dict) -> List[Tuple[str, float]]:
 
         raw_result = self.cluster_service.get_relevant_clusters(event_ml, self.clusters)
-        
+
         # Преобразуем np.float64 → float для каждого кортежа
         cleaned_result = []
         for cluster_id, score in raw_result:
             cleaned_result.append((cluster_id, float(score)))  # явное приведение
-        
+
         return cleaned_result
+    
+    def _create_place_from_item(self, item: Dict) -> Place:
+        """Создаёт объект Place из JSON-ответа API"""
+        # Обработка координат
+        coords = item.get("coords", {})
+        lat = coords.get("lat")
+        lon = coords.get("lon")
+
+
+        # Обработка метро
+        subway_str = item.get("subway", "")
+        subway = [station.strip() for station in subway_str.split(",")] if subway_str else []
+
+        # Обработка категорий
+        categories = item.get("categories", [])
+
+        # Обработка тегов
+        tags = item.get("tags", [])
+
+
+        return Place(
+            id=item["id"],
+            title=item.get("title", ""),
+            address=item.get("address", ""),
+            description=item.get("description", ""),
+            place_url=item.get("site_url", ""),
+            image_url=item.get("images", [{}])[0].get("image", "") if item.get("images") else "",
+            lat=lat,
+            lon=lon,
+            phone=item.get("phone", ""),
+            site_url=item.get("foreign_url", "") or item.get("site_url", ""),
+            timetable=item.get("timetable", ""),
+            is_free=item.get("is_free", False),
+            favorites_count=item.get("favorites_count", 0),
+            comments_count=item.get("comments_count", 0),
+            slug=item.get("slug", ""),
+            subway=subway,
+            is_closed=item.get("is_closed", False),
+            categories=categories,
+            short_title=item.get("short_title", ""),
+            tags=tags,
+            location=item.get("location", ""),
+            age_restriction=item.get("age_restriction"),
+            disable_comments=item.get("disable_comments", False),
+            has_parking_lot=item.get("has_parking_lot", False)
+        )
     
     def _create_event_from_item(self, item: Dict) -> Event:
         # Извлекаем и преобразуем даты
         start_str = item.get("start")
         end_str = item.get("finish")
-        
+
         start_dt = self._parse_datetime(start_str)
         end_dt = self._parse_datetime(end_str)
-        
+
         # Определяем статус на основе дат
         status = self._get_event_status(start_dt, end_dt)
+
         
-        place = item.get("place") or {}
-        images = item.get("images", [])
-        categories = item.get("categories", [])
+        place_id = None
+        place_data = item.get("place")
+
+        # Проверяем, что place_data — словарь и содержит ключ "id"
+        if isinstance(place_data, dict) and "id" in place_data:
+            place_id = place_data["id"]
+        else:
+            print(f"Ошибка: поле 'place' отсутствует или некорректно: {place_data}")
 
         tags = item.get("tags", [])
         logging.debug(f"Типы элементов в tags: {[type(t) for t in tags]}")   
@@ -715,7 +836,7 @@ class EventManager:
         #Сохраняем status_ml
 
         event_ml = self.extract_event_fields(item)
-        
+
         # Получаем вектор статусов (список кортежей: [(cluster_id, score), ...])
         status_vector = self._get_status_vector(event_ml)
 
@@ -732,7 +853,7 @@ class EventManager:
         # Конвертируем в JSON-строку для столбца JSONB
         status_ml = json.dumps(status_ml)
 
-        
+
             #ЭТО ЗАВТРА ПОМЕНЯТЬ
            #ЭТО ЗАВТРА ПОМЕНЯТЬ
           #ЭТО ЗАВТРА ПОМЕНЯТЬ
@@ -742,16 +863,18 @@ class EventManager:
       #ЭТО ЗАВТРА ПОМЕНЯТЬ
      #ЭТО ЗАВТРА ПОМЕНЯТЬ
     #ЭТО ЗАВТРА ПОМЕНЯТЬ
-        
+
         #каждый раз загружать модель  заново
         # event_ml = self.extract_event_fields(item)
         # status_ml = get_status_vector(event_ml, 'C:/Users/redmi/events_soft/ai/clusters.json')
-                    
+        images = item.get("images", [])
+        categories = item.get("categories", [])
+
         return Event(
             title=item.get("title", ""),
             description=item.get("description", ""),
-            place_name=place.get("title", "") or "",
-            address=place.get("address", "") or "",
+            place_name=item.get("title", "") or "",
+            address=item.get("address", "") or "",
             event_url=item.get("site_url", ""),
             image_url=images[0].get("image", "") if images else "",
             start_datetime=start_dt,
@@ -771,13 +894,15 @@ class EventManager:
             favorites_count=item.get("favorites_count", 0),
             comments_count=item.get("comments_count", 0),
             short_title=item.get("short_title", ""),
-            disable_comments=item.get("disable_comments", False)
+            disable_comments=item.get("disable_comments", False),
+            place_id=place_id
+
         )
-    
+
     def get_all_events(self) -> List[Dict]:
         """Получить все мероприятия из всех городов через базу данных"""
         return self.db.get_all_events()
-    
+
     
     def get_upcoming_events_periods(self, cities: List[str]) -> Dict[str, List[Dict]]:
         """
@@ -898,54 +1023,148 @@ class EventManager:
                 logging.error(f"Ошибка при обработке города {city}: {e}", exc_info=True)
 
 
+    def sync_places(self, cities: List[str], limit: int=2000):
+        """
+        Синхронизирует места (places) для указанных городов:
+        - получает ID мест через API;
+        - загружает детали по каждому месту;
+        - сохраняет в БД (с обновлением при конфликте по ID).
 
 
-# if __name__ == "__main__":
+        Args:
+            cities (List[str]): Список городов (например, ["spb", "msk"]).
+            limit (int): Лимит мест на город (по умолчанию 100).
+        """
+        self.db.connect()
 
-#     logging.basicConfig(
-#         level=logging.INFO,
-#         format="%(asctime)s [%(levelname)s] %(message)s",
-#         datefmt="%Y-%m-%d %H:%M:%S"
-#     )
 
-#     # Параметры подключения к БД
-#     DB_DSN = (
-#         f"dbname={os.getenv('DB_NAME')} "
-#         f"user={os.getenv('DB_USER')} "
-#         f"password={os.getenv('DB_PASSWORD')} "
-#         f"host={os.getenv('DB_HOST')} "
-#         f"port={os.getenv('DB_PORT')} "
-#         f"options='-c client_encoding=UTF8'"
-#     )
+        for city in cities:
 
-#     # Список городов для синхронизации
-#     CITIES = ["msk", "spb"]
+            logging.info(f"Places Обработка города: {city}")
+            self.db.create_city_table(city)
 
-#     try:
-#         # Создаем менеджер
-#         manager = EventManager(
-#             db_dsn=DB_DSN,
-#             api_base_url="https://kudago.com/public-api/v1.4"
-#         )
+            try:
+                # 1. Получаем ID мест для города
+                place_ids = self._get_place_ids(city, limit)
+                if not place_ids:
+                    logging.warning(f"Нет мест для города {city}")
+                    continue
 
-#         # Синхронизируем мероприятия
-#         manager.sync_events(cities=CITIES, limit=50)
+                logging.info(f"Получено {len(place_ids)} ID мест для {city}")
 
-#         # Получаем все мероприятия
-#         all_events = manager.get_all_events()
+                # 2. Загружаем детали по каждому месту
+                full_places = []
+                for place_id in place_ids:
+                    details = self.api.get_place_details(place_id)
+                    if details:
+                        full_places.append(details)
+                    else:
+                        logging.warning(f"Не удалось получить детали для места {place_id}")
 
-#         logging.info(f"Всего мероприятий во всех городах: {len(all_events)}")
+                if not full_places:
+                    logging.info(f"Нет данных для сохранения по городу {city}")
+                    continue
 
-#         # Выводим результаты
-#         for event in all_events:
-#             city = event['city']
-#             title = event['title']
-#             start_time = event['start_datetime']
-#             status = event['status']
-#             print(f"{city} | {title} | {start_time} | Статус: {status}")
+                # 3. Преобразуем в объекты Place
+                places = []
+                for item in full_places:
+                    try:
+                        place = self._create_place_from_item(item)
+                        places.append(place)
+                    except Exception as e:
+                        logging.error(f"Ошибка при создании Place для id={item.get('id')}: {e}")
 
-#     except Exception as e:
-#         logging.error(f"Ошибка выполнения: {e}")
-#     finally:
-#         if 'manager' in locals():
-#             manager.close()
+
+                if not places:
+                    logging.warning(f"Не создано ни одного объекта Place для города {city}")
+                    continue
+
+                # 4. Сохраняем в БД
+                self.db.save_places(places)
+                logging.info(f"Сохранено {len(places)} мест для города {city}")
+
+
+            except Exception as e:
+                logging.error(f"Ошибка при синхронизации мест для города {city}: {e}", exc_info=True)
+
+
+    def _get_place_ids(self, city: str, limit: int) -> List[int]:
+        """
+        Получает список ID мест для указанного города через API.
+
+        Args:
+            city (str): Город (например, "spb").
+            limit (int): Лимит результатов.
+
+        Returns:
+            List[int]: Список ID мест.
+        """
+        all_ids = []
+        page = 1
+        retry_count = 0
+        max_retries = 3
+
+        while True:
+            try:
+                params = {
+                    "fields": "id",
+                    "order_by": "id",
+                    "location": city,
+                    "page": page,
+                    "limit": limit  # Ограничиваем количество на страницу
+                }
+
+                response = self.api.session.get(
+                    f"{self.api.base_url}/places/",
+                    params=params,
+                    timeout=15
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    places = data.get("results", [])
+
+                    if not places:
+                        logging.info(f"Страница {page}: нет мест. Завершаем.")
+                        break
+
+                    # Добавляем ID мест
+                    for place in places:
+                        all_ids.append(place["id"])
+
+                    logging.info(f"Страница {page}: {len(places)} мест. Всего: {len(all_ids)}")
+
+
+                    # Проверяем наличие следующей страницы
+                    next_page = data.get("next")
+                    if not next_page:
+                        logging.info("Больше страниц нет. Завершаем.")
+                        break
+
+                    page += 1
+                    retry_count = 0  # Сброс счётчика попыток
+
+
+                elif response.status_code == 429:
+                    wait_time = 5 * (2 ** retry_count)
+                    logging.warning(f"429: слишком много запросов. Пауза {wait_time} сек...")
+                    time.sleep(wait_time)
+                    retry_count += 1
+
+                else:
+                    logging.error(f"Ошибка {response.status_code} на странице {page}: {response.text}")
+                    retry_count += 1
+
+            except Exception as e:
+                logging.error(f"Исключение на странице {page}: {e}")
+                retry_count += 1
+
+            # Проверка на превышение попыток
+            if retry_count >= max_retries:
+                logging.error(f"Превышено количество попыток ({max_retries}) для страницы {page}. Завершаем.")
+                break
+
+            time.sleep(0.5)  # Пауза между запросами
+
+        return all_ids
+

@@ -126,16 +126,24 @@ async def recommend(message: Message, bot, state: FSMContext):
             await message.answer("Сначала напишите /start")
             return
 
+        # Получаем ID событий, с которыми пользователь уже взаимодействовал
+        interacted_events = set()
+        for action in user["event_history"]:
+            interacted_events.add(action["event_id"])
+
         city = user.get("city")
         tables_to_search = ["msk"] if city == 1 else ["spb"] if city == 2 else ["msk", "spb"]
 
+
         all_candidates = []
         for table_name in tables_to_search:
-            candidates = db.get_recommended_events(table_name=table_name, limit=50)
-            logger.info(f"Найдено событий в {table_name}: {len(candidates)}")  # Отладка
+            # Фильтруем события, которых нет в interacted_events
+            candidates = db.get_recommended_events(
+                table_name=table_name, 
+                limit=50,
+                exclude_event_ids=interacted_events  # Новый параметр!
+            )
             all_candidates.extend(candidates)
-
-        logger.info(f"Всего кандидатов: {len(all_candidates)}")  # Отладка
 
         recommended = ml.recommend(user["event_history"], all_candidates)
         logger.info(f"Рекомендовано событий: {len(recommended)}")  # Отладка
@@ -249,6 +257,8 @@ async def button_handler(callback: CallbackQuery, bot, state: FSMContext):
         if data.startswith("like_"):
             event_id = int(data.split("_")[1])
             db.add_event_to_history(user_id, event_id, "like")
+            db.increment_event_likes(event_id, 'spb')
+            db.increment_event_likes(event_id, 'msk')
             data_state = await state.get_data()
             recommended = data_state.get("recommended_events", [])
             event = next((e for e in recommended if str(e["id"]) == str(event_id)), None)
@@ -264,7 +274,7 @@ async def button_handler(callback: CallbackQuery, bot, state: FSMContext):
                     db.update_user_status_ml(user_id, serialize_for_db(new_status_ml))
                 except Exception as e:
                     logger.error(f"Ошибка при обновлении статуса ML для {user_id}: {e}")
-            await callback.answer("😊")
+            await callback.answer("учтем в рекомендациях😊")
             await next_event(callback, state)
 
 
@@ -281,6 +291,7 @@ async def button_handler(callback: CallbackQuery, bot, state: FSMContext):
             await show_event(callback, state)
 
 
+
         elif data.startswith("confirm_go_"):
             parts = data.split("_")
             # Проверяем, что частей ровно 3: ['confirm', 'go', '222565']
@@ -294,13 +305,16 @@ async def button_handler(callback: CallbackQuery, bot, state: FSMContext):
                 await callback.answer("Некорректный ID события.")
                 return
 
+            # Теперь event_id определён — можно вызывать increment_event_likes
+            db.increment_event_likes(event_id, 'spb')
+            db.increment_event_likes(event_id, 'msk')
+
             success = db.confirm_event(user_id, event_id)
             if success:
                 await callback.answer("Вы подтвердили участие! 😊")
                 await show_event(callback, state)
             else:
                 await callback.answer("Не удалось подтвердить участие. Попробуйте позже.")
-
 
 
         else:

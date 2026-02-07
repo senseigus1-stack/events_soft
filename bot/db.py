@@ -1,3 +1,4 @@
+
 import psycopg2
 import json
 from config import Config
@@ -68,16 +69,71 @@ class Database_Users:
             self.conn.rollback()  # Откат транзакции при ошибке
             return False
 
-    def add_event_to_history(self, user_id: int, event_id: int, rating: str):
-        user = self.get_user(user_id)
-        history = user["event_history"]
-        history.append({"event_id": event_id, "rating": rating})
-        with self.conn.cursor() as cur:
-            cur.execute(
-                "UPDATE users SET event_history = %s WHERE id = %s",
-                (json.dumps(history[-Config.MAX_HISTORY:]), user_id)
-            )
-        self.conn.commit()
+    def add_event_to_history(self, user_id: int, event_id: int, rating: str) -> bool:
+        """
+        Добавляет событие в историю пользователя с ограничением по размеру.
+        Возвращает True при успехе, False при ошибке.
+        """
+        # Валидация входных данных
+        if not isinstance(user_id, int) or not isinstance(event_id, int):
+            logging.error(f"Некорректные ID: user_id={user_id}, event_id={event_id}")
+            return False
+
+        if rating not in ["like", "dislike", "confirmed"]:
+            logging.error(f"Недопустимый рейтинг: {rating}")
+            return False
+
+        try:
+            # Получаем текущую историю (отдельная транзакция)
+            user = self.get_user(user_id)
+            if not user:
+                logging.error(f"Пользователь не найден: {user_id}")
+                return False
+
+            history = user.get("event_history", [])
+            
+            # Удаляем дубликаты (если событие уже есть в истории)
+            history = [
+                item for item in history 
+                if item["event_id"] != event_id
+            ]
+            
+            # Добавляем новое событие
+            new_entry = {
+                "event_id": event_id,
+                "rating": rating,
+                "timestamp": int(datetime.now().timestamp())  # Важно: время добавления
+            }
+            history.append(new_entry)
+
+            # Ограничиваем размер истории
+            MAX_HISTORY = 100  # Лучше вынести в конфиг
+            history = history[-MAX_HISTORY:]
+
+            # Обновляем БД
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users 
+                    SET event_history = %s
+                    WHERE id = %s
+                    AND event_history IS DISTINCT FROM %s  -- Оптимизация: не обновлять, если данные не изменились
+                    """,
+                    (json.dumps(history, ensure_ascii=False), user_id, json.dumps(history))
+                )
+                
+                # Проверяем, была ли запись обновлена
+                if cur.rowcount == 0:
+                    logging.warning(f"История не обновлена (возможно, дубликат): user_id={user_id}, event_id={event_id}")
+                    return False
+
+            self.conn.commit()
+            return True
+
+        except Exception as e:
+            logging.exception(f"Ошибка при добавлении в историю: user_id={user_id}, event_id={event_id}, ошибка={e}")
+            # Не коммитим транзакцию при ошибке
+            return False
 
 
     # def get_recommended_events(self, table_name: str, limit: int = 10) -> list:
@@ -98,58 +154,74 @@ class Database_Users:
     #             for r in rows
     #         ]
  
-
     def get_recommended_events(
         self,
         table_name: str,
-        limit: int = 40,
+        limit: int = 50,
         months_ahead: float = 1.5,
-        use_local_time: bool = False
+        use_local_time: bool = False,
+        exclude_event_ids: set = None  # Новый параметр!
     ) -> list:
         
-        # 1. Определяем текущее время в UTC (рекомендуется)
+        # 1. Определяем текущее время
         if use_local_time:
-            # Если нужен локальный часовой пояс (например, МСК)
             local_tz = pytz.timezone('Europe/Moscow')
             now = datetime.now(local_tz)
         else:
-            now = datetime.utcnow().replace(tzinfo=pytz.utc)  # UTC с явным tzinfo
+            now = datetime.utcnow().replace(tzinfo=pytz.utc)
 
-        # 2. Рассчитываем границу
+        # 2. Рассчитываем временной интервал
         total_days = int(months_ahead * 30)
         future_limit = now + timedelta(days=total_days)
-        
-        # Преобразуем в UNIX-timestamp (целое число)
         now_ts = int(now.timestamp())
         future_limit_ts = int(future_limit.timestamp())
 
-        # 3. SQL-запрос: выбираем ближайшую будущую дату для каждого события
+        # 3. Формируем условие для исключения событий
+        exclude_ids_tuple = tuple(exclude_event_ids) if exclude_event_ids else ()
+        exclude_clause = ""
+        if exclude_ids_tuple:
+            exclude_clause = f" AND t.id NOT IN ({', '.join(['%s'] * len(exclude_ids_tuple))})"
+
+        # 4. SQL-запрос с JOIN к таблице places и исключением событий
         with self.conn.cursor() as cur:
-            cur.execute(f"""
+            query = f"""
                 SELECT
                     t.id,
                     t.title,
                     t.description,
                     min_dates.start_datetime,
                     t.event_url,
-                    t.status_ml
+                    t.status_ml,
+                    t.favorites_count,
+                    p.address,
+                    p.title AS place_title
                 FROM {table_name} t
                 JOIN (
                     SELECT
                         event_id,
                         MIN(start_timestamp) AS start_datetime
                     FROM event_dates_{table_name}
-                    WHERE start_timestamp >= %s    -- Только будущие даты
-                    AND start_timestamp <= %s  -- В пределах 1.5 месяцев
+                    WHERE start_timestamp >= %s
+                    AND start_timestamp <= %s
                     GROUP BY event_id
                 ) min_dates ON t.id = min_dates.event_id
-                ORDER BY RANDOM()
+                LEFT JOIN places p ON t.place_id = p.id
+                WHERE 1=1  -- Базовая условная конструкция для удобства добавления условий
+                {exclude_clause}
+                ORDER BY t.favorites_count DESC, min_dates.start_datetime ASC
                 LIMIT %s
-            """, (now_ts, future_limit_ts, limit))
+            """
+            
+            # Формируем параметры для запроса
+            params = [now_ts, future_limit_ts]
+            if exclude_ids_tuple:
+                params.extend(exclude_ids_tuple)
+            params.append(limit)
 
+            cur.execute(query, params)
             rows = cur.fetchall()
 
-        # 4. Формируем ответ
+        # 5. Формируем результат
         return [
             {
                 "id": r[0],
@@ -157,11 +229,13 @@ class Database_Users:
                 "description": r[2],
                 "start_datetime": int(r[3]) if r[3] is not None else None,
                 "event_url": r[4],
-                "status_ml": r[5]
+                "status_ml": r[5],
+                "likes": r[6] if r[6] is not None else 0,
+                "address": r[7] if r[7] is not None else "",
+                "place_title": r[8] if r[8] is not None else ""
             }
             for r in rows
         ]
-    
 
 
     # --- Реферальная система ---
@@ -358,3 +432,25 @@ class Database_Users:
         except Exception as e:
             logger.error(f"[DB] Ошибка получения мероприятия {event_id}: {e}")
             return None
+        
+    def increment_event_likes(self, event_id: int, table_name: str) -> bool:
+        """
+        Увеличивает счётчик likes у события на 1.
+        Возвращает True, если обновление прошло успешно.
+        """
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE {table_name} SET likes = likes + 1 WHERE id = %s",
+                    (event_id,)
+                )
+                if cur.rowcount == 0:
+                    logger.warning(f"Событие {event_id} не найдено в таблице {table_name}")
+                    return False
+            self.conn.commit()
+            logger.info(f"Событие {event_id}: лайк добавлен (+1)")
+            return True
+        except Exception as e:
+            logger.error(f"Ошибка при увеличении likes для event_id={event_id}: {e}")
+            self.conn.rollback()
+            return False
