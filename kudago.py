@@ -311,6 +311,7 @@ class Database:
             referrer_id BIGINT NOT NULL,
             referred_id BIGINT NOT NULL,
             referral_code VARCHAR(50) NOT NULL,
+            is_friend BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             CONSTRAINT fk_referrer
                 FOREIGN KEY (referrer_id)
@@ -328,8 +329,8 @@ class Database:
         # 6. Таблица user_confirmed_events (исправлено: FOREIGN KEY, PRIMARY KEY)
         query6 = f"""
         CREATE TABLE IF NOT EXISTS user_confirmed_events (
-            user_id INT NOT NULL,
-            event_id INT NOT NULL,
+            user_id BIGINT NOT NULL,
+            event_id BIGINT NOT NULL,
             confirmed_at TIMESTAMP WITH TIME ZONE NOT NULL,
             reminder_sent BOOLEAN DEFAULT FALSE,
             PRIMARY KEY (user_id, event_id),
@@ -350,6 +351,33 @@ class Database:
 
             # сделать инвалидное кеширование с JSONB отсюда
 
+        query8 = f"""
+        CREATE TABLE IF NOT EXISTS friends (
+            user_id BIGINT NOT NULL,
+            friend_id BIGINT NOT NULL,
+            added_at TIMESTAMPTZ DEFAULT NOW(),
+            PRIMARY KEY (user_id, friend_id),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+            """
+        query9 = f"""
+        CREATE TABLE IF NOT EXISTS invitations (
+            id SERIAL PRIMARY KEY,
+            event_id INTEGER NOT NULL,
+            sender_id BIGINT NOT NULL,      -- кто отправил
+            receiver_id BIGINT NOT NULL,   -- кому отправили
+            token VARCHAR(16) UNIQUE NOT NULL,
+            status VARCHAR(20) NOT NULL,    -- sent, delivered, viewed, accepted, declined, failed
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE
+        );
+
+        -- Индексы для скорости поиска
+        CREATE INDEX IF NOT EXISTS idx_invitations_token ON invitations(token);
+        CREATE INDEX IF NOT EXISTS idx_invitations_receiver ON invitations(receiver_id);
+        CREATE INDEX IF NOT EXISTS idx_invitations_event ON invitations(event_id);
+        """
         with self.connection.cursor() as cursor:
             # 1. Создаём таблицу places
             cursor.execute(query4)
@@ -365,6 +393,8 @@ class Database:
             cursor.execute(query5)
             cursor.execute(query6)
             cursor.execute(query7)
+            cursor.execute(query8)
+            cursor.execute(query9)
         self.connection.commit()
         logging.info(f"Таблица {table_name} создана успешно")
 

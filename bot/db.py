@@ -2,7 +2,7 @@
 import psycopg2
 import json
 from config import Config
-from typing import List, Optional
+from typing import List, Optional, Dict
 import logging
 from datetime import datetime, timezone
 from datetime import timedelta
@@ -295,23 +295,38 @@ class Database_Users:
             logger.error(f"Ошибка при проверке реферального статуса {user_id}: {e}")
             return False
 
+
     def add_referral(self, user_id: int, referrer_id: int, code: str) -> bool:
-        """Добавляет запись о реферале в БД."""
+        """Добавляет запись о реферале и устанавливает дружбу."""
         try:
             with self.conn.cursor() as cur:
+                # Добавляем запись о реферале
                 cur.execute(
                     """
-                    INSERT INTO referrals (referrer_id, referred_id, referral_code)
-                    VALUES (%s, %s, %s)
+                    INSERT INTO referrals (referrer_id, referred_id, referral_code, is_friend)
+                    VALUES (%s, %s, %s, TRUE)
+                    ON CONFLICT (referrer_id, referred_id) DO NOTHING
                     """,
                     (referrer_id, user_id, code)
                 )
+                
+                # Добавляем дружбу в обе стороны
+                cur.execute(
+                    """
+                    INSERT INTO friends (user_id, friend_id)
+                    VALUES (%s, %s), (%s, %s)
+                    ON CONFLICT (user_id, friend_id) DO NOTHING
+                    """,
+                    (referrer_id, user_id, user_id, referrer_id)
+                )
+            
             self.conn.commit()
-            logger.info(f"Реферальный переход: {referrer_id} → {user_id} (код {code})")
+            logger.info(f"Реферальный переход: {referrer_id} → {user_id} (код {code}). Дружба установлена.")
             return True
         except Exception as e:
             logger.error(f"Ошибка при добавлении реферала {user_id}: {e}")
             self.conn.rollback()
+            return False
 
     def get_upcoming_confirmed(self, days_ahead: int = 1) -> list:
 
@@ -411,26 +426,49 @@ class Database_Users:
         
     
     def get_event_by_id(self, event_id: int, table_name: str) -> Optional[dict]:
-        """Возвращает данные мероприятия по ID из указанной таблицы."""
+        """
+        Возвращает данные мероприятия по ID из указанной таблицы.
+        
+        :param event_id: ID мероприятия
+        :param table_name: Название таблицы (должно быть проверено заранее)
+        :return: Словарь с данными мероприятия или None
+        """
+        # Список разрешённых таблиц (защита от SQL‑инъекций)
+        ALLOWED_TABLES = {"msk", "spb"}
+        
+        if table_name not in ALLOWED_TABLES:
+            logger.error(f"[DB] Запрещённая таблица: {table_name}")
+            return None
+
         try:
             with self.conn.cursor() as cur:
-                cur.execute(f"""
-                    SELECT id, title, description, start_datetime, event_url
+                # Используем параметризованный запрос только для значений, а не для имён таблиц
+                query = f"""
+                    SELECT 
+                        id,
+                        title,
+                        description,
+                        start_datetime,
+                        event_url
                     FROM {table_name}
                     WHERE id = %s
-                    """, (event_id,))
+                """
+                cur.execute(query, (event_id,))
                 row = cur.fetchone()
-                if row:
-                    return {
-                        "id": row[0],
-                        "title": row[1],
-                        "description": row[2],
-                        "start_datetime": row[3],
-                        "event_url": row[4]
-                    }
-                return None
+
+                if not row:
+                    return None
+
+                # Явное сопоставление колонок (защита от изменения порядка)
+                return {
+                    "id": row[0],
+                    "title": row[1] or "",  # Если NULL → пустая строка
+                    "description": row[2] or "",
+                    "start_datetime": row[3],
+                    "event_url": row[4] or ""
+                }
         except Exception as e:
-            logger.error(f"[DB] Ошибка получения мероприятия {event_id}: {e}")
+            logger.error(f"[DB] Ошибка получения мероприятия {event_id} из таблицы {table_name}: {e}")
             return None
         
     def increment_event_likes(self, event_id: int, table_name: str) -> bool:
@@ -454,3 +492,278 @@ class Database_Users:
             logger.error(f"Ошибка при увеличении likes для event_id={event_id}: {e}")
             self.conn.rollback()
             return False
+
+
+
+        #---Логика, связанная с друзьями
+
+
+
+
+    def get_friends(self, user_id: int) -> List[Dict]:
+        with self.conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT f.friend_id, u.name
+                FROM friends f
+                JOIN users u ON f.friend_id = u.id
+                WHERE f.user_id = %s
+                ORDER BY u.name
+                """,
+                (user_id,)
+            )
+            rows = cur.fetchall()
+        
+        # Отладка: проверим, что rows — это список кортежей
+        print("Raw rows from DB:", rows)  # например: [(123, 'Иван'), (456, None)]
+        
+        result = [
+            {"id": row[0], "name": row[1] or f"Друг {row[0]}"}
+            for row in rows
+        ]
+        
+        # Отладка: проверим итоговый результат
+        print("Result list:", result)
+        
+        return result
+    
+    def remove_friend(self, user_id: int, friend_id: int) -> bool:
+        """Удаляет друга из списка."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    "DELETE FROM friends WHERE user_id = %s AND friend_id = %s",
+                    (user_id, friend_id)
+                )
+            self.conn.commit()
+            logger.info(f"Друг {friend_id} удалён для пользователя {user_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Ошибка при удалении друга {friend_id} для {user_id}: {e}")
+            self.conn.rollback()
+            return False
+
+    def get_friends(self, user_id: int) -> List[int]:
+        """Возвращает список ID друзей пользователя."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    "SELECT friend_id FROM friends WHERE user_id = %s ORDER BY added_at DESC",
+                    (user_id,)
+                )
+                rows = cur.fetchall()
+            return [row[0] for row in rows]
+        except Exception as e:
+            logger.error(f"Ошибка при получении друзей для {user_id}: {e}")
+            return []
+
+    def are_friends(self, user_id: int, friend_id: int) -> bool:
+        """Проверяет, являются ли пользователи друзьями."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    "SELECT 1 FROM friends WHERE user_id = %s AND friend_id = %s",
+                    (user_id, friend_id)
+                )
+                return cur.fetchone() is not None
+        except Exception as e:
+            logger.error(f"Ошибка при проверке дружбы между {user_id} и {friend_id}: {e}")
+            return False
+        
+        
+    def get_confirmed_events_for_user(self, user_id: int) -> List[Dict]:
+        """
+        Возвращает список подтверждённых мероприятий для указанного пользователя.
+        """
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        e.event_id,
+                        e.title,
+                        e.start_datetime,
+                        e.event_url,
+                        t.city
+                    FROM user_confirmed_events uce
+                    JOIN (
+                        SELECT id, title, start_datetime, event_url, 'msk' AS city FROM msk
+                        UNION ALL
+                        SELECT id, title, start_datetime, event_url, 'spb' AS city FROM spb
+                    ) e ON uce.event_id = e.event_id
+                    WHERE uce.user_id = %s
+                    AND uce.confirmed_at IS NOT NULL
+                    ORDER BY e.start_datetime
+                    """, (user_id,))
+
+                rows = cur.fetchall()
+                return [
+                    {
+                        "event_id": r[0],
+                        "title": r[1],
+                        "start_datetime": r[2],
+                        "event_url": r[3],
+                        "city": r[4]
+                    }
+                    for r in rows
+                ]
+        except Exception as e:
+            logger.error(f"[DB] Ошибка при получении подтверждённых событий для {user_id}: {e}")
+            return []
+        
+    def save_invitation(self, event_id: int, sender_id: int, receiver_id: int, token: str, status: str):
+        """Сохраняет приглашение в БД."""
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO invitations (event_id, sender_id, receiver_id, token, status, created_at) "
+                "VALUES (%s, %s, %s, %s, %s, NOW())",
+                (event_id, sender_id, receiver_id, token, status)
+            )
+        self.conn.commit()
+
+    def get_invitation_by_token(self, token: str) -> dict | None:
+        """Получает приглашение по токену."""
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM invitations WHERE token = %s",
+                (token,)
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+
+
+    def update_invitation_status(self, token: str, status: str):
+        """Обновляет статус приглашения."""
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "UPDATE invitations SET status = %s, updated_at = NOW() WHERE token = %s",
+                (status, token)
+            )
+        self.conn.commit()
+
+
+    def get_all_users_except(self, excluded_user_id: int) -> list[dict]:
+        """
+        Возвращает список всех пользователей, кроме указанного по ID.
+        
+        :param excluded_user_id: ID пользователя, которого нужно исключить
+        :return: список словарей с данными пользователей
+        """
+        try:
+            query = """
+                SELECT id, name, city, created_at
+                FROM users
+                WHERE id != %s
+                ORDER BY name
+            """
+            with self.conn.cursor() as cur:
+                cur.execute(query, (excluded_user_id,))
+                # Получаем имена колонок
+                columns = [col[0] for col in cur.description]
+                # Преобразуем каждую строку (кортеж) в словарь
+                result = [dict(zip(columns, row)) for row in cur.fetchall()]
+            return result
+        except Exception as e:
+            logger.error(f"[ERROR] get_all_users_except: {e}")
+            return []
+    def get_confirmed_future_events(self, user_id: int) -> List[Dict]:
+        """
+        Возвращает подтверждённые и ещё не прошедшие мероприятия пользователя.
+        
+        :param user_id: ID пользователя
+        :return: список событий с полями: event_id, title, start_datetime, event_url, city
+        """
+        try:
+            # Текущее время в UTC (как в БД)
+            now_ts = int(datetime.now(timezone.utc).timestamp())
+
+            with self.conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        e.event_id,
+                        e.title,
+                        e.start_datetime,
+                        e.event_url,
+                        t.city
+                    FROM user_confirmed_events uce
+                    JOIN (
+                        SELECT id, title, start_datetime, event_url, 'msk' AS city FROM msk
+                        UNION ALL
+                        SELECT id, title, start_datetime, event_url, 'spb' AS city FROM spb
+                    ) e ON uce.event_id = e.event_id
+                    WHERE uce.user_id = %s
+                    AND uce.confirmed_at IS NOT NULL
+                    AND e.start_datetime > %s  -- Только будущие события
+                    ORDER BY e.start_datetime
+                    """, (user_id, now_ts))
+
+                rows = cur.fetchall()
+                return [
+                    {
+                        "event_id": r[0],
+                        "title": r[1],
+                        "start_datetime": r[2],
+                        "event_url": r[3],
+                        "city": r[4]
+                    }
+                    for r in rows
+                ]
+        except Exception as e:
+            logger.error(f"[DB] Ошибка при получении будущих подтверждённых событий для {user_id}: {e}")
+            return []
+        
+    def get_place_by_event_id(self, event_id: int, table_name: str) -> Optional[dict]:
+        """
+        Возвращает данные места (название, адрес, сайт) по event_id из указанной таблицы событий.
+
+        :param event_id: ID мероприятия
+        :param table_name: Название таблицы событий ('msk' или 'spb')
+        :return: Словарь с полями 'title', 'address', 'site_url' или None
+        """
+        # Список разрешённых таблиц (защита от SQL‑инъекций)
+        ALLOWED_TABLES = {"msk", "spb"}
+
+        if table_name not in ALLOWED_TABLES:
+            logger.error(f"[DB] Запрещённая таблица: {table_name}")
+            return None
+
+        try:
+            with self.conn.cursor() as cur:
+                # Шаг 1: получаем place_id из таблицы событий по event_id
+                query_event = f"""
+                    SELECT place_id
+                    FROM {table_name}
+                    WHERE id = %s
+                """
+                cur.execute(query_event, (event_id,))
+                event_row = cur.fetchone()
+
+                if not event_row or not event_row[0]:
+                    return None  # Нет place_id или event_id не найден
+
+                place_id = event_row[0]
+
+                # Шаг 2: получаем данные места из таблицы places
+                query_place = """
+                    SELECT
+                        title,
+                        address,
+                        site_url
+                    FROM places
+                    WHERE id = %s
+                """
+                cur.execute(query_place, (place_id,))
+                place_row = cur.fetchone()
+
+                if not place_row:
+                    return None  # Место не найдено по place_id
+
+                # Формируем результат
+                return {
+                    "title": place_row[0] or "",
+                    "address": place_row[1] or "",
+                    "site_url": place_row[2] or ""
+                }
+
+        except Exception as e:
+            logger.error(f"[DB] Ошибка получения места для event_id={event_id} из таблицы {table_name}: {e}")
+            return None

@@ -6,7 +6,27 @@ from aiogram.filters import Command
 from config import CONFIG
 from db import Database_Users
 from ml import MLService
-from handlers import start, recommend, button_handler, handle_city_selection, show_referral
+from new import (
+    start,
+    handle_city_selection,
+    show_main_menu,
+    recommend,
+    button_handler,
+    show_referral,
+    add_friend,
+    remove_friend,
+    my_friends,
+    friend_events,
+    add_event,
+    process_event_data,
+    help_command,
+    handle_friend_events,
+    invite_event,
+    handle_invite_event,
+    handle_invitation_link,
+    handle_decline_invite,
+    EventStates
+)
 import ssl
 from aiohttp import web
 
@@ -86,14 +106,29 @@ def setup_routes():
     logger.info(f"Маршрут настроен: POST /{path}")
 
 async def main():
-    try:
-        # Регистрация обработчиков
+    try:  
         dp.message.register(start, Command("start"))
-        dp.message.register(handle_city_selection, F.text.in_(["МСК", "СПБ", "МСК и СПБ"]))
-        dp.message.register(show_referral, Command("referral"))
+        dp.message.register(
+            handle_city_selection,
+            F.text.in_(["Москва", "Санкт‑Петербург", "Оба города"])
+        )
+        # Регистрация обработчиков
+        dp.message.register(show_main_menu, Command("menu"))  # Если есть команда /menu
         dp.message.register(recommend, Command("recommend"))
         dp.callback_query.register(button_handler)
-
+        dp.message.register(show_referral, Command("referral"))
+        dp.message.register(add_friend, Command("addfriend"))
+        dp.message.register(remove_friend, Command("removefriend"))
+        dp.message.register(my_friends, Command("myfriends"))
+        dp.message.register(friend_events, Command("friendevents"))
+        dp.message.register(add_event, Command("add"))
+        dp.message.register(process_event_data, F.state(EventStates.waiting_for_event_data))
+        dp.message.register(help_command, Command("help"))
+        dp.callback_query.register(handle_friend_events, F.data.startswith("show_friend_events_"))
+        dp.message.register(invite_event, Command("invite"))
+        dp.callback_query.register(handle_invite_event, F.data.startswith("invite_event_"))
+        dp.message.register(handle_invitation_link, F.text.contains("start=invite_"))
+        dp.callback_query.register(handle_decline_invite, F.data.startswith("decline_invite_"))
         # Настройка сервера
         setup_routes()
         app.on_startup.append(on_startup)
