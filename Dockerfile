@@ -1,4 +1,5 @@
-FROM python:3.11.12-alpine
+FROM python:3.11.14-alpine
+
 
 # Метаданные
 LABEL maintainer="clegpscb@gmail.com"

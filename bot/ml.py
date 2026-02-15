@@ -14,8 +14,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s | %(levelname)s | %(message)s',
     handlers=[
-        logging.FileHandler("status_updates.log", encoding="utf-8"),
-        logging.StreamHandler()  # вывод в консоль
+        logging.FileHandler("status_updates.log", encoding="utf-8")
     ]
 )
 logger = logging.getLogger(__name__)
@@ -94,13 +93,14 @@ class MLService:
         scores = []
         for ev in candidates:
             ev_vec = self.get_event_vector(ev)
-            # Косинусное сходство
+                # Косинусное сходство
             cos_sim = np.dot(pred_vec, ev_vec) / (np.linalg.norm(pred_vec) * np.linalg.norm(ev_vec))
             scores.append((ev, cos_sim))
-        
-        # Сортируем по убыванию сходства
+            
+            # Сортируем по убыванию сходства
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
         return [item[0] for item in sorted_scores[:Config.RECOMMEND_COUNT]]
+
 
     def _recommend_by_status_ml(self, user_history: list, candidates: list) -> list:
         """Базовая рекомендация через сравнение status_ml"""

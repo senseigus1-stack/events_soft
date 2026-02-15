@@ -1,6 +1,7 @@
 
 import asyncio
 import logging
+from logging.handlers import RotatingFileHandler
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command
 from config import CONFIG
@@ -13,36 +14,58 @@ from new import (
     recommend,
     button_handler,
     show_referral,
-    add_friend,
-    remove_friend,
-    my_friends,
-    friend_events,
-    add_event,
-    process_event_data,
-    help_command,
-    handle_friend_events,
-    invite_event,
-    handle_invite_event,
-    handle_invitation_link,
-    handle_decline_invite,
-    EventStates
+    ask_city,
+    handle_show_confirmed_events,
+    recommend_main_interest
 )
 import ssl
 from aiohttp import web
 
 # Импортируем планировщик
 from scheduled import setup_scheduler, scheduler
-
-# Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(levelname)s | %(message)s',
-    handlers=[
-        logging.FileHandler("bot.log", encoding="utf-8"),
-        logging.StreamHandler()
-    ]
+# Создаём два обработчика с разными файлами
+info_handler = RotatingFileHandler(
+    "bot_info.log",
+    maxBytes=10*1024*1024,  # 10 МБ на файл
+    backupCount=2,  # хранить 2 старых файла (всего ~30 МБ)
+    encoding="utf-8"
 )
+
+error_handler = RotatingFileHandler(
+    "bot_error.log",
+    maxBytes=50*1024*1024,  # 50 МБ на файл
+    backupCount=10,  # хранить 10 старых файлов (всего ~550 МБ)
+    encoding="utf-8"
+)
+
+# Настраиваем формат
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+info_handler.setFormatter(formatter)
+error_handler.setFormatter(formatter)
+
+# Фильтр для INFO (только INFO)
+class InfoFilter(logging.Filter):
+    def filter(self, record):
+        return record.levelno == logging.INFO
+
+# Фильтр для ERROR (ERROR и выше: ERROR, CRITICAL)
+class ErrorFilter(logging.Filter):
+    def filter(self, record):
+        return record.levelno >= logging.ERROR
+
+# Применяем фильтры
+info_handler.addFilter(InfoFilter())
+error_handler.addFilter(ErrorFilter())
+
+# Настраиваем логгер
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # собираем все уровни
+
+# Добавляем обработчики
+logger.addHandler(info_handler)
+logger.addHandler(error_handler)
+
+
 
 # Глобальные переменные
 app = web.Application()
@@ -108,27 +131,14 @@ def setup_routes():
 async def main():
     try:  
         dp.message.register(start, Command("start"))
-        dp.message.register(
-            handle_city_selection,
-            F.text.in_(["Москва", "Санкт‑Петербург", "Оба города"])
-        )
-        # Регистрация обработчиков
-        dp.message.register(show_main_menu, Command("menu"))  # Если есть команда /menu
+        dp.message.register(ask_city, F.text.in_(["Москва", "Санкт‑Петербург", "Оба города"]))
+        dp.message.register(show_main_menu, Command("menu"))
         dp.message.register(recommend, Command("recommend"))
-        dp.callback_query.register(button_handler)
         dp.message.register(show_referral, Command("referral"))
-        dp.message.register(add_friend, Command("addfriend"))
-        dp.message.register(remove_friend, Command("removefriend"))
-        dp.message.register(my_friends, Command("myfriends"))
-        dp.message.register(friend_events, Command("friendevents"))
-        dp.message.register(add_event, Command("add"))
-        dp.message.register(process_event_data, F.state(EventStates.waiting_for_event_data))
-        dp.message.register(help_command, Command("help"))
-        dp.callback_query.register(handle_friend_events, F.data.startswith("show_friend_events_"))
-        dp.message.register(invite_event, Command("invite"))
-        dp.callback_query.register(handle_invite_event, F.data.startswith("invite_event_"))
-        dp.message.register(handle_invitation_link, F.text.contains("start=invite_"))
-        dp.callback_query.register(handle_decline_invite, F.data.startswith("decline_invite_"))
+        dp.message.register(handle_city_selection)
+        dp.message.register(recommend_main_interest, Command("main"))
+        dp.callback_query.register(button_handler, F.data.startswith(("like_", "dislike_", "confirm_", "next_")))
+        dp.callback_query.register(handle_show_confirmed_events, F.data.startswith("show_confirmed_events_"))
         # Настройка сервера
         setup_routes()
         app.on_startup.append(on_startup)

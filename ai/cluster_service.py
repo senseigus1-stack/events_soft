@@ -83,7 +83,7 @@ class ClusterService:
                     logger.warning(f"Skipping cluster {cluster.название} due to an error: {e}")
 
             # Фильтрация по возрасту
-            age_restriction = event.get('age_restriction')
+            age_restriction = event.get('age_restriction')  # Получаем возраст из 
             if age_restriction:
                 scores = [
                     (name, sim) for name, sim in scores

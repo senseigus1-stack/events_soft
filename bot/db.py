@@ -1,20 +1,21 @@
-
+import random
 import psycopg2
 import json
 from config import Config
-from typing import List, Optional, Dict
-import logging
+from typing import List, Optional, Dict, Any
+import logging 
 from datetime import datetime, timezone
 from datetime import timedelta
 import time
 import pytz  # Для явного указания часового пояса
+from ml import MLService
+
 # Настраиваем логгер
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s | %(levelname)s | %(message)s',
     handlers=[
-        logging.FileHandler("status_updates.log", encoding="utf-8"),
-        logging.StreamHandler()  # вывод в консоль
+        logging.FileHandler("status_updates.log", encoding="utf-8")
     ]
 )
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 class Database_Users:
     def __init__(self):
         self.conn = psycopg2.connect(Config.DB_DSN)
-
+        self.ml_service = MLService()
 
     def get_user(self, user_id: int):
         with self.conn.cursor() as cur:
@@ -42,31 +43,71 @@ class Database_Users:
             "status_ml": row[2] if row[2] is not None else [],  # Возвращает строку или None → []
             "event_history": row[3] if row[3] is not None else []  # То же самое
         }
-
-    def update_user_status_ml(self, user_id: int, status_ml: List) -> bool:
+    
+    def update_user_status_ml(
+        self, 
+        user_id: int,
+        status_ml: Optional[List[Dict[str, Any]]]
+    ) -> bool:
+        """
+        Обновляет status_ml пользователя в БД.
         
-        # # Проверка типа
+        Args:
+            user_id: ID пользователя
+            status_ml: Список словарей вида [{"category": "cat1", "score": 0.5}, ...]
+        
+        Returns:
+            True если обновление успешно, False в случае ошибки
+        """
+        # # 1. Валидация входных данных
         # if not isinstance(status_ml, list):
-        #     print(f"Ошибка: status_ml должен быть списком, получено {type(status_ml)}")
+        #     logger.error(f"status_ml должен быть списком, получено {type(status_ml)} для user_id={user_id}")
         #     return False
+
+        if len(status_ml) == 0:
+            logger.warning(f"Пустой status_ml передан для user_id={user_id}. Операция продолжена.")
+
+        # # Проверяем структуру каждого элемента (опционально, можно убрать если уверены в данных)
+        # for item in status_ml:
+        #     if not isinstance(item, dict):
+        #         logger.error(f"Элемент status_ml не является словарём: {item} для user_id={user_id}")
+        #         return False
+        #     if "category" not in item or "score" not in item:
+        #         logger.error(f"Отсутствует required поле в элементе status_ml: {item} для user_id={user_id}")
+        #         return False
+        #     if not isinstance(item["score"], (int, float)):
+        #         logger.error(f"Поле score должно быть числом: {item['score']} для user_id={user_id}")
+        #         return False
 
         try:
             with self.conn.cursor() as cur:
+                # 2. Преобразуем в JSON
+                # json_data = json.dumps(status_ml, ensure_ascii=False)
+                
                 cur.execute(
                     "UPDATE users SET status_ml = %s WHERE id = %s",
-                    (json.dumps(status_ml), user_id)
+                    (status_ml, user_id)
                 )
-                # Проверяем, затронута ли хотя бы одна строка
+                
+                # 3. Проверяем результат
                 if cur.rowcount == 0:
-                    print(f"Пользователь с ID {user_id} не найден")
+                    logger.warning(f"Пользователь с ID {user_id} не найден в БД")
                     return False
-
+                
+            # 4. Commit только если всё прошло успешно
             self.conn.commit()
+            logger.info(f"status_ml успешно обновлён для user_id={user_id}, записано {len(status_ml)} категорий")
             return True
 
+
+        except (TypeError, ValueError) as e:
+            logger.error(f"Ошибка сериализации JSON для user_id={user_id}: {e}")
+            self.conn.rollback()
+            return False
+
         except Exception as e:
-            print(f"Ошибка при обновлении status_ml для user_id={user_id}: {e}")
-            self.conn.rollback()  # Откат транзакции при ошибке
+            logger.exception(f"Неожиданная ошибка при обновлении status_ml для user_id={user_id}: {e}")
+            self.conn.rollback()
             return False
 
     def add_event_to_history(self, user_id: int, event_id: int, rating: str) -> bool:
@@ -153,16 +194,16 @@ class Database_Users:
     #             }
     #             for r in rows
     #         ]
- 
+    
     def get_recommended_events(
         self,
         table_name: str,
         limit: int = 50,
         months_ahead: float = 1.5,
         use_local_time: bool = False,
-        exclude_event_ids: set = None  # Новый параметр!
+        exclude_event_ids: set = None
     ) -> list:
-        
+
         # 1. Определяем текущее время
         if use_local_time:
             local_tz = pytz.timezone('Europe/Moscow')
@@ -176,52 +217,58 @@ class Database_Users:
         now_ts = int(now.timestamp())
         future_limit_ts = int(future_limit.timestamp())
 
-        # 3. Формируем условие для исключения событий
+        # 3. Подготовка условия исключения событий
         exclude_ids_tuple = tuple(exclude_event_ids) if exclude_event_ids else ()
         exclude_clause = ""
         if exclude_ids_tuple:
             exclude_clause = f" AND t.id NOT IN ({', '.join(['%s'] * len(exclude_ids_tuple))})"
 
-        # 4. SQL-запрос с JOIN к таблице places и исключением событий
-        with self.conn.cursor() as cur:
-            query = f"""
+        # 4. Единый запрос с приоритетной сортировкой
+        query = f"""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                min_dates.start_datetime,
+                t.event_url,
+                t.status_ml,
+                t.favorites_count,
+                p.address,
+                p.title AS place_title
+            FROM {table_name} t
+            JOIN (
                 SELECT
-                    t.id,
-                    t.title,
-                    t.description,
-                    min_dates.start_datetime,
-                    t.event_url,
-                    t.status_ml,
-                    t.favorites_count,
-                    p.address,
-                    p.title AS place_title
-                FROM {table_name} t
-                JOIN (
-                    SELECT
-                        event_id,
-                        MIN(start_timestamp) AS start_datetime
-                    FROM event_dates_{table_name}
-                    WHERE start_timestamp >= %s
-                    AND start_timestamp <= %s
-                    GROUP BY event_id
-                ) min_dates ON t.id = min_dates.event_id
-                LEFT JOIN places p ON t.place_id = p.id
-                WHERE 1=1  -- Базовая условная конструкция для удобства добавления условий
-                {exclude_clause}
-                ORDER BY t.favorites_count DESC, min_dates.start_datetime ASC
-                LIMIT %s
-            """
-            
-            # Формируем параметры для запроса
+                    event_id,
+                    MIN(start_timestamp) AS start_datetime
+                FROM event_dates_{table_name}
+                WHERE start_timestamp >= %s
+                AND start_timestamp <= %s
+                GROUP BY event_id
+            ) min_dates ON t.id = min_dates.event_id
+            LEFT JOIN places p ON t.place_id = p.id
+            WHERE TRUE {exclude_clause}
+            ORDER BY
+                CASE
+                    WHEN 'добавленное' = ANY(t.tags) THEN 1  -- высший приоритет
+                    WHEN 'интересное' = ANY(t.tags) THEN 2  -- средний приоритет
+                    ELSE 3  -- низкий приоритет
+                END,
+                t.favorites_count DESC,      -- далее по числу лайков
+                min_dates.start_datetime ASC -- затем по времени начала
+            LIMIT %s
+        """
+
+        # 5. Выполняем запрос
+        with self.conn.cursor() as cur:
             params = [now_ts, future_limit_ts]
             if exclude_ids_tuple:
                 params.extend(exclude_ids_tuple)
             params.append(limit)
-
             cur.execute(query, params)
             rows = cur.fetchall()
+            logger.info(f"Retrieved {len(rows)} recommended events")
 
-        # 5. Формируем результат
+        # 6. Формируем итоговый список
         return [
             {
                 "id": r[0],
@@ -236,8 +283,6 @@ class Database_Users:
             }
             for r in rows
         ]
-
-
     # --- Реферальная система ---
 
     def save_referral_code(self, user_id: int, code: str) -> bool:
@@ -767,3 +812,302 @@ class Database_Users:
         except Exception as e:
             logger.error(f"[DB] Ошибка получения места для event_id={event_id} из таблицы {table_name}: {e}")
             return None
+        
+    
+
+
+    def add_event(
+        self,
+        table_name: str,
+        title: str,
+        description: str,
+        start_datetime: int,
+        event_url: str,
+        added_by: int,
+        status_ml: List[Dict]=None
+
+   # Ожидаем список диктов
+    ) -> bool:
+
+        ALLOWED_TABLES = {"msk", "spb"}
+
+        # 1. Проверка таблицы
+        if table_name not in ALLOWED_TABLES:
+            logger.error(f"[DB] Запрещённая таблица: {table_name}")
+            return False
+
+
+        status_ml =[
+                {
+                    "score": 0.9,
+                    "category": "Nostalgia‑поколение",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Романтики‑эстеты",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Поклонники стендапа",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Ценители оперного и вокального искусства",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Ночные искатели приключений",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Джаз‑адепты",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Рок‑энтузиасты",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Любители гастрономического театра",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Фанаты мюзиклов и Бродвея",
+                    "description": ""
+                },
+                {
+                    "score": 0.9,
+                    "category": "Ностальгирующие романтики",
+                    "description": ""
+                }
+            
+            ]
+
+        max_attempts = 100
+        candidate_id = None
+
+        # 5. Генерация уникального ID
+        for attempt in range(max_attempts):
+            candidate_id = random.randint(1_000_000, 9_999_999)
+            try:
+                with self.conn.cursor() as cur:
+                    cur.execute(
+                        f"SELECT 1 FROM {table_name} WHERE id = %s",
+                        (candidate_id,)
+                    )
+                    if not cur.fetchone():
+                        break
+            except Exception as e:
+                logger.error(f"[DB] Ошибка при проверке ID {candidate_id}: {e}")
+                return False
+        else:
+            logger.error(f"[DB] Не удалось сгенерировать уникальный ID после {max_attempts} попыток")
+            return False
+
+        # 6. Вставка в БД
+        try:
+            with self.conn.cursor() as cur:
+                # Основной запрос (с полем status_ml)
+                query_main = f"""
+                    INSERT INTO {table_name} (
+                        id, title, description, event_url, added_by, tags, status_ml
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s
+                    )
+                """
+                tags_list = ['добавленное']
+                cur.execute(
+                    query_main,
+                    (
+                        candidate_id,
+                        title,
+                        description,
+                        event_url,
+                        added_by,
+                        tags_list,
+                        json.dumps(status_ml)  # Преобразуем список в JSONB
+                    )
+                )
+
+                # Вставка в таблицу дат
+                query_dates = f"""
+                    INSERT INTO event_dates_{table_name} (
+                        event_id, start_timestamp, end_timestamp
+                    ) VALUES (
+                        %s, %s, %s
+                    )
+                """
+                cur.execute(query_dates, (candidate_id, start_datetime, start_datetime))
+
+            self.conn.commit()
+            logger.info(f"Мероприятие '{title}' добавлено с ID={candidate_id}")
+
+
+            # 7. ML-обработка (если нужно)
+            try:
+                new_event = {
+                    "id": candidate_id,
+                    "title": title,
+                    "description": description,
+                    "status_ml": status_ml
+                }
+                self.ml_service.encode_text(f"{title} {description}")
+                logger.info(f"ML-обработка события ID={candidate_id} завершена")
+            except Exception as ml_e:
+                logger.error(f"[ML] Ошибка при обработке события ID={candidate_id}: {ml_e}")
+
+            return True
+
+        except Exception as e:
+            self.conn.rollback()
+            logger.error(f"[DB] Ошибка при добавлении мероприятия: {e}")
+            return False
+
+
+
+    def get_recommended_interest(
+        self,
+        table_name: str,
+        limit: int = 12,
+        months_ahead: float = 1.5,
+        use_local_time: bool = False,
+        exclude_event_ids: set = None
+    ) -> list:
+        """
+        Возвращает мероприятия: сначала с тегом 'добавленное', затем с тегом 'интересное'.
+        Сортировка внутри групп: по likes (DESC), затем по времени начала (ASC).
+        Общий лимит — limit.
+        """
+
+        # 1. Определяем текущее время
+        if use_local_time:
+            local_tz = pytz.timezone('Europe/Moscow')
+            now = datetime.now(local_tz)
+        else:
+            now = datetime.utcnow().replace(tzinfo=pytz.utc)
+
+        # 2. Рассчитываем временной интервал
+        total_days = int(months_ahead * 30)
+        future_limit = now + timedelta(days=total_days)
+        now_ts = int(now.timestamp())
+        future_limit_ts = int(future_limit.timestamp())
+
+        # 3. Подготовка условия исключения событий
+        exclude_ids_tuple = tuple(exclude_event_ids) if exclude_event_ids else ()
+        exclude_clause = ""
+        if exclude_ids_tuple:
+            exclude_clause = f" AND t.id NOT IN ({', '.join(['%s'] * len(exclude_ids_tuple))})"
+
+        # 4. Запрос для событий с тегом 'добавленное'
+        query_added = f"""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                min_dates.start_datetime,
+                t.event_url,
+                t.status_ml,
+                t.favorites_count,
+                p.address,
+                p.title AS place_title
+            FROM {table_name} t
+            JOIN (
+                SELECT
+                    event_id,
+                    MIN(start_timestamp) AS start_datetime
+                FROM event_dates_{table_name}
+                WHERE start_timestamp >= %s
+                AND start_timestamp <= %s
+                GROUP BY event_id
+            ) min_dates ON t.id = min_dates.event_id
+            LEFT JOIN places p ON t.place_id = p.id
+            WHERE 'добавленное' = ANY(t.tags) {exclude_clause}
+            ORDER BY
+                t.favorites_count DESC,
+                min_dates.start_datetime ASC
+            LIMIT %s
+        """
+
+        # 5. Запрос для событий с тегом 'интересное'
+        query_interesting = f"""
+            SELECT
+                t.id,
+                t.title,
+                t.description,
+                min_dates.start_datetime,
+                t.event_url,
+                t.status_ml,
+                t.favorites_count,
+                p.address,
+                p.title AS place_title
+            FROM {table_name} t
+            JOIN (
+                SELECT
+                    event_id,
+                    MIN(start_timestamp) AS start_datetime
+                FROM event_dates_{table_name}
+                WHERE start_timestamp >= %s
+                AND start_timestamp <= %s
+                GROUP BY event_id
+            ) min_dates ON t.id = min_dates.event_id
+            LEFT JOIN places p ON t.place_id = p.id
+            WHERE 'интересное' = ANY(t.tags) {exclude_clause}
+            ORDER BY
+                t.favorites_count DESC,
+                min_dates.start_datetime ASC
+            LIMIT %s
+        """
+
+        all_rows = []
+
+        # 6. Выполняем запрос для 'добавленное'
+        with self.conn.cursor() as cur:
+            params_added = [now_ts, future_limit_ts]
+            if exclude_ids_tuple:
+                params_added.extend(exclude_ids_tuple)
+            params_added.append(limit)  # Лимит на первую группу (можно скорректировать)
+
+            cur.execute(query_added, params_added)
+            rows_added = cur.fetchall()
+            all_rows.extend(rows_added)
+
+        # Если уже набрали limit, обрезаем
+        if len(all_rows) >= limit:
+            all_rows = all_rows[:limit]
+        else:
+            # 7. Выполняем запрос для 'интересное' (с учётом уже выбранных)
+            remaining = limit - len(all_rows)
+            if remaining > 0:
+                with self.conn.cursor() as cur:
+                    params_interesting = [now_ts, future_limit_ts]
+                    if exclude_ids_tuple:
+                        params_interesting.extend(exclude_ids_tuple)
+                    params_interesting.append(remaining)
+
+                    cur.execute(query_interesting, params_interesting)
+                    rows_interesting = cur.fetchall()
+                    all_rows.extend(rows_interesting)
+
+        # 8. Формируем итоговый список
+        return [
+            {
+                "id": r[0],
+                "title": r[1],
+                "description": r[2],
+                "start_datetime": int(r[3]) if r[3] is not None else None,
+                "event_url": r[4],
+                "status_ml": r[5],
+                "likes": r[6] if r[6] is not None else 0,
+                "address": r[7] if r[7] is not None else "",
+                "place_title": r[8] if r[8] is not None else ""
+            }
+            for r in all_rows
+        ]

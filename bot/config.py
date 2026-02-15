@@ -38,17 +38,19 @@ class Config:
     # Обязательные параметры
     TELEGRAM_TOKEN: str = env("TELEGRAM_TOKEN", default="").strip()
     DB_DSN: str = env("POSTGRES_URI", default="").strip()
-
+    ADMIN_IDS: int = env("ADMIN_IDS")
     # Опциональные параметры с дефолтами
     REDIS_HOST: str = env("REDIS_HOST", default="localhost").strip()
     REDIS_PORT: int = env("REDIS_PORT", default=6379, cast=int)
-
+    СLUSTERS_PATH: str = env(
+        "CLUSTERS_PATH", default="clusters.json"
+    ).strip()
     MODEL_NAME: str = env("MODEL_NAME", default="all-MiniLM-L6-v2").strip()
     BATCH_SIZE: int = env("BATCH_SIZE", default=16, cast=int)
 
     MAX_HISTORY: int = 50
-    RNN_SEQ_LEN: int = 10
-    RECOMMEND_COUNT: int = 5
+    RNN_SEQ_LEN: int = 15
+    RECOMMEND_COUNT: int = 12
 
     CACHE_TTL: int = env("CACHE_TTL", default=604800, cast=int)
     TOP_K: int = env("TOP_K", default=10, cast=int)

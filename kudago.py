@@ -273,6 +273,7 @@ class Database:
             disable_comments BOOLEAN,
             place_id BIGINT,
             likes BIGINT DEFAULT 0,
+            added_by BIGINT, 
             CONSTRAINT fk_place
                 FOREIGN KEY (place_id)
                 REFERENCES places (id)
@@ -665,7 +666,7 @@ class EventManager:
 
     def __init__(self, db_dsn: str,
                 api_base_url: str = "https://kudago.com/public-api/v1.4",
-                clusters_path:str='C:/Users/arsenii/events_soft/ai/clusters.json'
+                clusters_path:str=os.getenv('CLUSTERS_PATH')
                 ):
 
         self.api = KudaGoAPI(api_base_url)

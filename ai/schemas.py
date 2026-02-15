@@ -9,7 +9,7 @@ class Cluster(BaseModel):
     мотивация: List[str]
 
 class Event_ML(BaseModel):
-    id: int
+    id: Optional[int] = None
     title: str
     description: str
     category: Optional[str] = None

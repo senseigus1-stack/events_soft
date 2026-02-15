@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, F, types
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import CONFIG
 from db import Database_Users
@@ -17,14 +17,17 @@ from new import (
     recommend,
     button_handler,
     show_referral,
-    my_friends,
-    friend_events,
-    handle_invite_event,
-    ask_city,
-    handle_decline_invite,
-    handle_accept_invite,
-    handle_select_event_for_invite,
     handle_show_confirmed_events,
+    add_event_command,
+    process_city,
+    process_title,
+    process_description,
+    process_datetime,
+    process_url,
+    confirm_event,
+    handle_moderation,
+    recommend_main_interest,
+    AddEventStates
 )
 
 logger = logging.getLogger(__name__)
@@ -49,15 +52,64 @@ async def main():
         logger.info("Планировщик запущен")
 
         dp.message.register(start, Command("start"))
-        dp.message.register(ask_city, F.text.in_(["Москва", "Санкт‑Петербург", "Оба города"]))
+
+        # 2. Обработка выбора города (только для сообщений с текстом из списка)
+        dp.message.register(
+            handle_city_selection,
+            F.text.in_(["Москва", "Санкт‑Петербург", "Оба города"])
+        )
+        dp.message.register(recommend_main_interest, Command("main"))
         dp.message.register(show_main_menu, Command("menu"))
         dp.message.register(recommend, Command("recommend"))
         dp.message.register(show_referral, Command("referral"))
         # dp.message.register(my_friends, Command("myfriends"))
         # dp.message.register(friend_events, Command("friendevents"))
-        dp.message.register(handle_city_selection)
+# 1. Команда /add (старт)
+        dp.message.register(
+            add_event_command,
+            Command("add")
+        )
 
+        # 2. Обработка выбора города (состояние wait_city)
+        dp.message.register(
+            process_city,
+            StateFilter(AddEventStates.wait_city)
+        )
 
+        # 3. Обработка названия (состояние wait_title)
+        dp.message.register(
+            process_title,
+            StateFilter(AddEventStates.wait_title)
+        )
+
+        # 4. Обработка описания (состояние wait_description)
+        dp.message.register(
+            process_description,
+            StateFilter(AddEventStates.wait_description)
+        )
+
+        # 5. Обработка даты/времени (состояние wait_datetime)
+        dp.message.register(
+            process_datetime,
+            StateFilter(AddEventStates.wait_datetime)
+        )
+
+        # 6. Обработка URL (состояние wait_url)
+        dp.message.register(
+            process_url,
+            StateFilter(AddEventStates.wait_url)
+        )
+
+        # 7. Подтверждение (состояние confirm)
+        dp.message.register(
+            confirm_event,
+            StateFilter(AddEventStates.confirm)
+        )
+
+        dp.callback_query.register(
+            handle_moderation,
+            F.data.startswith(("approve_", "reject_"))
+        )
         dp.callback_query.register(button_handler, F.data.startswith(("like_", "dislike_", "confirm_", "next_")))
         dp.callback_query.register(handle_show_confirmed_events, F.data.startswith("show_confirmed_events_"))
         # dp.callback_query.register(handle_select_event_for_invite, F.data.startswith("invite_to_event_"))

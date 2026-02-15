@@ -1,4 +1,4 @@
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram import F
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup
 from aiogram.filters import Command
@@ -13,18 +13,44 @@ import hashlib
 import logging
 from datetime import datetime
 import pytz
+import redis.asyncio as redis
+from config import Config
+import time
+from pydantic import BaseModel
+from typing import List, Dict, Optional, Tuple
 
 
-# Настраиваем логгер
+import sys
+import os
+
+# Получаем путь к корню проекта
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Добавляем корень проекта в sys.path (а не папку bot)
+sys.path.insert(1, project_root)
+
+# Теперь импорт сработает
+from kudago import EventManager
+
+
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.ERROR,  # Только ошибки и критические сообщения
     format='%(asctime)s | %(levelname)s | %(message)s',
     handlers=[
-        logging.FileHandler("status_updates.log", encoding="utf-8"),
-        logging.StreamHandler()
+        logging.FileHandler("status_updates.log", encoding="utf-8")
     ]
 )
+
 logger = logging.getLogger(__name__)
+
+class Event_ML(BaseModel):
+    id: int
+    title: str
+    description: str
+    category: Optional[str] = None
+    tags: List[str] = []
+    age_restriction: Optional[str] = None  #  for example: "18+"
+    status_ml: Optional[dict] = None
 
 # Состояния
 class RecommendationState(StatesGroup):
@@ -230,14 +256,15 @@ async def show_main_menu(message: Message):
     await message.answer(
         "👋 Привет! Я бот для рекомендаций мероприятий.\n\n"
         "<b>Доступные команды:</b>\n\n"
-        "🔸 /recommend — рекомендации событий\n"
+        "🔸 /recommend — рекомендации событий(индвивидуальные)\n"
+        "🔸 /main - события, выбираемые чаще всего\n"
         "🔸 /referral — реферальная ссылка\n"
         "🔸 /add — предложить мероприятие\n"
         "🔸 /help — справка\n\n"
-        "   Скоро в функционале:\n\n"
-        "       🔸/myfriends — список друзей\n"
-        "       🔸/friendevents — мероприятия друга\n"
-        "       🔸/invite — отправить приглашение друзьям на мероприятие\n\n"
+        "  <b>Скоро в функционале:</b>\n"
+        "      🔸/myfriends — список друзей\n"
+        "      🔸/friendevents — мероприятия друга\n"
+        "      🔸/invite — отправить приглашение друзьям на мероприятие\n\n"
         "Нажмите на команду, чтобы использовать её.",
         parse_mode="HTML",
         disable_web_page_preview=True
@@ -246,6 +273,77 @@ async def show_main_menu(message: Message):
 
 
 # --- РЕКОМЕНДАЦИИ ---
+async def recommend_main_interest(message: Message, bot, state: FSMContext):
+    logger.info(f"[recommend] Запуск рекомендации для user_id={message.from_user.id}")
+    db = bot.db
+    user_id = message.from_user.id
+
+    try:
+        user = db.get_user(user_id)
+        if not user:
+            await message.answer("Сначала напишите /start")
+            logger.warning(f"[recommend] Пользователь {user_id} не найден в БД.")
+            return
+
+        # События, с которыми пользователь взаимодействовал
+        interacted = {
+            action["event_id"] for action in user.get("event_history", [])
+        }
+        logger.debug(f"[recommend] События, с которыми взаимодействовал пользователь: {interacted}")
+
+        # Определяем таблицы для поиска
+        city = user.get("city")
+        tables = ["msk"] if city == 1 else ["spb"] if city == 2 else ["msk", "spb"]
+        logger.info(f"[recommend] Таблицы для поиска: {tables}, город пользователя: {city}")
+
+
+        # Собираем кандидатов из всех таблиц
+        all_candidates = []
+        for table in tables:
+            candidates = db.get_recommended_interest(
+                table_name=table,
+                limit=12,
+                exclude_event_ids=interacted
+            )
+            all_candidates.extend(candidates)
+            logger.debug(f"[recommend] Найдено {len(candidates)} кандидатов из таблицы {table}")
+
+
+
+
+        # === ПОЛУЧАЕМ ДАННЫЕ МЕСТ ДЛЯ ВСЕХ РЕКОМЕНДОВАННЫХ СОБЫТИЙ ===
+        enhanced_recommended = []
+        for event in all_candidates:
+            event_id = event["id"]
+            place_data = None
+
+            # Определяем, из какой таблицы брать place_id (можно уточнить логику)
+            # Здесь берём первую подходящую таблицу из tables
+            for table in tables:
+                try:
+                    place_data = db.get_place_by_event_id(event_id, table)
+                    if place_data:
+                        break  # Нашли — выходим из цикла
+                except Exception as e:
+                    logger.warning(f"[recommend] Не удалось получить место для event_id={event_id} из таблицы {table}: {e}")
+
+            # Добавляем place_data к событию
+            enhanced_event = {**event, "place_data": place_data}
+            enhanced_recommended.append(enhanced_event)
+
+        # Сохраняем в state: уже с прикреплёнными данными места
+        await state.update_data(
+            recommended_events=enhanced_recommended,
+            current_index=0
+        )
+
+        await show_event(message, state)
+        logger.info(f"[recommend] Данные сохранены в FSM, запущено отображение событий для {user_id}")
+
+
+    except Exception as e:
+        logger.error(f"[recommend] Ошибка для {user_id}: {e}", exc_info=True)
+        await message.answer("Ошибка получения рекомендаций. Повторите попытку.")
 
 
 async def recommend(message: Message, bot, state: FSMContext):
@@ -1093,3 +1191,616 @@ async def show_invite_event(callback: CallbackQuery, state: FSMContext):
     except Exception as e:
         logger.error(f"[show_invite_event] Ошибка при показе мероприятия: {e}", exc_info=True)
         await callback.answer("Ошибка показа мероприятия. Попробуйте снова.")
+
+
+
+
+
+
+
+
+
+        #ADD LOGIC
+
+
+
+
+
+
+
+
+
+
+class AddEventStates(StatesGroup):
+    wait_city = State()      # Всегда спрашиваем город
+    wait_title = State()
+    wait_description = State()
+    wait_datetime = State()
+    wait_url = State()
+    confirm = State()
+
+
+
+async def add_event_command(message: Message, bot, state: FSMContext):
+    logger.info(f"[add_event_command] Запуск /add для user_id={message.from_user.id}")
+    db = bot.db
+    user_id = message.from_user.id
+
+    # Проверяем, есть ли пользователь в БД (для логирования)
+    user = db.get_user(user_id)
+    if not user:
+        await message.answer(
+            "Чтобы предложить мероприятие, сначала напишите /start."
+        )
+        logger.warning(f"[add_event_command] Пользователь {user_id} не найден в БД")
+        return
+
+    # Очищаем состояние
+    await state.clear()
+    await state.set_state(AddEventStates.wait_city)
+
+    # Клавиатура с вариантами городов и «Отменить»
+    city_kb = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Москва")],
+            [KeyboardButton(text="Санкт-Петербург")],
+            [KeyboardButton(text="Отменить")]
+        ],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "Выберите город мероприятия:",
+        reply_markup=city_kb
+    )
+    logger.debug(f"[add_event_command] Переход в состояние wait_city для {user_id}")
+
+
+
+async def process_city(message: Message, state: FSMContext):
+    if message.text == "Отменить":
+        await state.clear()
+        await message.answer(
+            "Добавление мероприятия отменено.",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
+        )
+        logger.info(f"[process_city] Отмена ввода от user_id={message.from_user.id}")
+        return
+
+    # Нормализуем ввод
+    city_input = message.text.strip().lower()
+    if city_input in ("москва", "msk", "m"):
+        city = "msk"
+    elif city_input in ("санкт-петербург", "спб", "spb", "s"):
+        city = "spb"
+    else:
+        await message.answer(
+            "Пожалуйста, выберите город из списка: «Москва» или «Санкт-Петербург»."
+        )
+        return
+
+    await state.update_data(city=city)
+    await state.set_state(AddEventStates.wait_title)
+
+    # Клавиатура с «Отменить»
+    cancel_kb = ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Отменить")]],
+        resize_keyboard=True
+    )
+
+    await message.answer(
+        "Введите название мероприятия:",
+        reply_markup=cancel_kb
+    )
+    logger.debug(f"[process_city] Сохранён city={city} для {message.from_user.id}")
+
+
+
+async def process_title(message: Message, state: FSMContext):
+    if message.text == "Отменить":
+        await state.clear()
+        await message.answer(
+            "Добавление мероприятия отменено.",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
+        )
+        logger.info(f"[process_title] Отмена ввода от user_id={message.from_user.id}")
+        return
+
+    title = message.text.strip()
+    if not title:
+        await message.answer("Название не может быть пустым. Попробуйте снова:")
+        return
+
+    await state.update_data(title=title)
+    await state.set_state(AddEventStates.wait_description)
+    await message.answer("Введите описание мероприятия:")
+    logger.debug(f"[process_title] Сохранено title='{title}' для {message.from_user.id}")
+
+
+
+async def process_description(message: Message, state: FSMContext):
+    if message.text == "Отменить":
+        await state.clear()
+        await message.answer(
+            "Добавление мероприятия отменено.",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
+        )
+        logger.info(f"[process_description] Отмена ввода от {message.from_user.id}")
+        return
+
+    description = message.text.strip()
+    if not description:
+        await message.answer("Описание не может быть пустым. Попробуйте снова:")
+        return
+
+    await state.update_data(description=description)
+    await state.set_state(AddEventStates.wait_datetime)
+    await message.answer(
+        "Введите дату и время начала в формате:\n"
+        "ДД.ММ.ГГГГ ЧЧ:ММ  или  ГГГГ-ММ-ДД ЧЧ:MM\n"
+        "Например: 25.12.2025 18:30",
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="Отменить")]],
+            resize_keyboard=True
+        )
+    )
+    logger.debug(f"[process_description] Сохранено description для {message.from_user.id}")
+
+
+
+async def process_datetime(message: Message, state: FSMContext):
+    if message.text == "Отменить":
+        await state.clear()
+        await message.answer(
+            "Добавление мероприятия отменено.",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
+        )
+        logger.info(f"[process_datetime] Отмена ввода от {message.from_user.id}")
+        return
+
+    user_input = message.text.strip()
+
+    # Поддерживаемые форматы
+    formats = [
+        "%d.%m.%Y %H:%M",  # 25.12.2025 18:30
+        "%Y-%m-%d %H:%M",   # 2025-12-25 18:30
+    ]
+
+    parsed_dt = None
+    for fmt in formats:
+        try:
+            parsed_dt = datetime.strptime(user_input, fmt)
+            break
+        except ValueError:
+            continue
+
+    if parsed_dt is None:
+        await message.answer(
+            "Ошибка: неверный формат даты/времени.\n"
+            "Используйте:\n"
+            "- ДД.ММ.ГГГГ ЧЧ:ММ  (например, 25.12.2025 18:30)\n"
+            "- ГГГГ-ММ-ДД ЧЧ:ММ  (например, 2025-12-25 18:30)"
+        )
+        return
+
+    # Преобразуем в UNIX timestamp (с учетом локального времени)
+    # Если нужен UTC — замените на pytz.UTC или другой часовой пояс
+    local_tz = pytz.timezone('Europe/Moscow')  # замените на нужный часовой пояс
+    localized_dt = local_tz.localize(parsed_dt)
+    unix_timestamp = int(localized_dt.timestamp())
+
+    await state.update_data(start_datetime=unix_timestamp)
+    await state.set_state(AddEventStates.wait_url)
+    await message.answer("Введите URL мероприятия:")
+    logger.debug(f"[process_datetime] Сохранён start_datetime={unix_timestamp} для {message.from_user.id}")
+
+async def process_url(message: Message, state: FSMContext):
+    if message.text == "Отменить":
+        await state.clear()
+        await message.answer(
+            "Добавление мероприятия отменено.",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
+        )
+        logger.info(f"[process_url] Отмена ввода от {message.from_user.id}")
+        return
+
+    url = message.text.strip()
+
+    # Базовая валидация URL
+    if not url:
+        await message.answer("URL не может быть пустым. Пожалуйста, введите ссылку на мероприятие:")
+        return
+
+    if not url.startswith(("http://", "https://")):
+        await message.answer(
+            "URL должен начинаться с http:// или https://. "
+            "Пожалуйста, исправьте и введите заново:"
+        )
+        return
+
+    # Дополнительная проверка длины (защита от чрезмерно длинных строк)
+    if len(url) > 500:
+        await message.answer(
+            "URL слишком длинный (максимум 500 символов). "
+            "Пожалуйста, сократите ссылку или используйте сервис сокращения:"
+        )
+        return
+
+    # Сохраняем в состояние
+    await state.update_data(event_url=url)
+    await state.set_state(AddEventStates.confirm)
+
+    # Получаем все данные для превью
+    data = await state.get_data()
+    city_name = "Москва" if data["city"] == "msk" else "Санкт-Петербург"
+
+    # Формируем предварительный просмотр
+    preview = (
+        "<b>Проверьте данные мероприятия:</b>\n\n"
+        f"<b>Город:</b> {city_name}\n"
+        f"<b>Название:</b> {html.escape(data['title'])}\n"
+        f"<b>Описание:</b> {html.escape(data['description'])}\n"
+        f"<b>Начало:</b> {format_moscow_time(data['start_datetime'])}\n"
+        f"<b>URL:</b> <a href='{html.escape(url)}'>Перейти</a>\n\n"
+        "Всё верно?"
+    )
+
+    # Клавиатура подтверждения
+    confirm_kb = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="Да")],
+            [KeyboardButton(text="Нет, изменить")],
+            [KeyboardButton(text="Отменить")]
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True  # Скрывается после нажатия
+    )
+
+    await message.answer(
+        preview,
+        parse_mode="HTML",
+        reply_markup=confirm_kb,
+        disable_web_page_preview=False  # Показываем превью ссылки
+    )
+    
+    logger.debug(
+        f"[process_url] Сохранён event_url и переход в состояние confirm "
+        f"для {message.from_user.id}"
+    )
+
+
+redis_client = redis.Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=0, decode_responses=True)
+async def confirm_event(message: Message, bot, state: FSMContext):
+    if message.text == "Отменить":
+        await state.clear()
+        await message.answer(
+            "Добавление мероприятия отменено.",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True)
+        )
+        logger.info(f"[confirm_event] Отмена подтверждения от {message.from_user.id}")
+        return
+
+    if message.text != "Да":
+        await message.answer("Давайте заполним данные заново.")
+        await add_event_command(message, state)
+        return
+
+    data = await state.get_data()
+    user_id = message.from_user.id
+
+    # Валидация обязательных полей
+    required_fields = ['city', 'title', 'description', 'start_datetime', 'event_url']
+    for field in required_fields:
+        if field not in data or not data[field]:
+            await message.answer("Ошибка: не все данные заполнены. Начнём заново.")
+            await state.clear()
+            await add_event_command(message, state)
+            return
+
+    event_key = f"event:{user_id}:{int(time.time())}"
+
+
+
+    try:
+        event_data = {
+            "city": str(data["city"]),
+            "title": str(data["title"]),
+            "description": str(data["description"]),
+            "start_datetime": str(data["start_datetime"]),
+            "event_url": str(data["event_url"]),
+            "added_by": str(user_id),
+            "status": "moderation"
+        }
+
+        # Проверка: все ли поля есть и не пустые
+        if not all(event_data.values()):
+            raise ValueError("Одно из полей event_data пустое")
+
+        pipe = redis_client.pipeline()
+        for field, value in event_data.items():
+            pipe.hset(event_key, field, value)
+        pipe.expire(event_key, 604800)  # TTL: 7 дней
+        await pipe.execute()
+
+        logger.info(f"[confirm_event] Сохранено в Redis: {event_key}")
+
+    except redis.RedisError as e:
+        logger.error(f"[confirm_event] Ошибка Redis: {e}")
+        await message.answer("Ошибка сохранения в Redis. Попробуйте позже.")
+        await state.clear()
+        return
+
+    # Формируем превью для админов
+    city_name = "Москва" if data["city"] == "msk" else "Санкт-Петербург"
+    preview = (
+        "<b>Новое мероприятие на модерацию</b>\n\n"
+        f"<b>Город:</b> {city_name}\n"
+        f"<b>Название:</b> {html.escape(data['title'])}\n"
+        f"<b>Описание:</b> {html.escape(data['description'])}\n"
+        f"<b>Начало:</b> {format_moscow_time(data['start_datetime'])}\n"
+        f"<b>URL:</b> <a href='{html.escape(data['event_url'])}'>Перейти</a>\n"
+        f"<b>Автор:</b> {user_id}\n\n"
+        "Одобрить?"
+    )
+
+    # Клавиатура для админов
+    moderation_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Одобрить", callback_data=f"approve_{event_key}"),
+            InlineKeyboardButton(text="Отклонить", callback_data=f"reject_{event_key}")
+        ]
+    ])
+
+    # Отправляем админу
+    try:
+        admin_id = int(Config.ADMIN_IDS)  # Одно число, например 123456789
+
+        if isinstance(admin_id, int):
+            await bot.send_message(
+                chat_id=admin_id,
+                text=preview,
+                parse_mode="HTML",
+                reply_markup=moderation_kb,
+                disable_web_page_preview=False
+            )
+            logger.info(f"[confirm_event] Отправлено админу {admin_id}")
+        else:
+            logger.error(f"[confirm_event] Config.ADMIN_IDS не является целым числом: {admin_id} (тип {type(admin_id)})")
+            await message.answer("Ошибка конфигурации: ID админа указан некорректно.")
+    except TelegramBadRequest as e:
+        logger.error(f"[confirm_event] Telegram ошибка (bad request) для ID {admin_id}: {e}")
+        await message.answer("Не удалось отправить сообщение админу (ошибка Telegram).")
+    except TelegramForbiddenError as e:
+        logger.error(f"[confirm_event] Бот заблокирован админом {admin_id}: {e}")
+        await message.answer("Бот заблокирован админом. Обратитесь к разработчику.")
+    except Exception as e:
+        logger.error(f"[confirm_event] Неожиданная ошибка при отправке админу: {e}")
+        await message.answer("Произошла ошибка при отправке сообщения админу.")
+
+# async def handle_moderation(callback: CallbackQuery, bot):
+#     db = bot.db
+#     data = callback.data
+#     if not data.startswith(("approve_", "reject_")):
+#         return
+
+#     action, event_key = data.split("_", 1)
+
+#     try:
+#         # Получаем данные из Redis
+#         event_data = await redis_client.hgetall(event_key)
+#         if not event_data:
+#             await callback.answer("Ошибка: данные не найдены в Redis.")
+#             return
+
+#         # Извлекаем поля для передачи в add_event
+#         try:
+#             table_name = event_data.get("city")  # Предполагаем, что "city" → "msk"/"spb"
+#             title = event_data.get("title")
+#             description = event_data.get("description")
+#             start_datetime_str = event_data.get("start_datetime")
+#             event_url = event_data.get("event_url")
+#             added_by_str = event_data.get("added_by")
+
+#             # Валидация обязательных полей
+#             if not all([table_name, title, description, start_datetime_str, event_url, added_by_str]):
+#                 await callback.answer("Ошибка: отсутствуют обязательные данные.")
+#                 logger.error(f"[handle_moderation] Неполные данные в Redis для {event_key}: {event_data}")
+#                 return
+
+#             # Преобразуем типы
+#             start_datetime = int(start_datetime_str)
+#             added_by = int(added_by_str)
+
+#         except (ValueError, TypeError) as e:
+#             await callback.answer("Ошибка: некорректные данные в Redis.")
+#             logger.error(f"[handle_moderation] Ошибка преобразования типов для {event_key}: {e}")
+#             return
+
+#         user_id = added_by  # ID пользователя, который добавил мероприятие
+
+#         if action == "approve":
+#             # Отправляем уведомление пользователю
+#             await bot.send_message(
+#                 user_id,
+#                 "Ваше мероприятие одобрено и опубликовано! 🎉"
+#             )
+#             clusters_path = os.getenv('CLUSTERS_PATH')
+#             event_manager = EventManager(
+#                 db_dsn="",  # можно пустой, т.к. БД не используется
+#                 clusters_path=clusters_path
+#             )
+#             # Вызываем add_event с извлечёнными аргументами
+#             success = db.add_event(
+#                 table_name=table_name,
+#                 title=title,
+#                 description=description,
+#                 start_datetime=start_datetime,
+#                 event_url=event_url,
+#                 added_by=added_by,
+#                 status_ml=status_ml
+#             )
+
+#             if success:
+#                 await callback.answer("Мероприятие одобрено и добавлено в базу данных.")
+#                 logger.info(f"[handle_moderation] Мероприятие {event_key} успешно добавлено в БД")
+#             else:
+#                 await callback.answer("Ошибка при добавлении в базу данных. Обратитесь к администратору.")
+#                 logger.error(f"[handle_moderation] add_event вернул False для {event_key}")
+
+
+#         elif action == "reject":
+#             # Отклонение: отправляем уведомление
+#             await bot.send_message(
+#                 user_id,
+#                 "Ваше мероприятие отклонено. Проверьте данные и попробуйте снова."
+#             )
+#             await callback.answer("Мероприятие отклонено.")
+
+#         # Удаляем запись из Redis (независимо от действия)
+#         await redis_client.delete(event_key)
+#         logger.info(f"[handle_moderation] Удалено из Redis: {event_key}")
+
+
+#     except Exception as e:
+#         logger.error(f"[handle_moderation] Неожиданная ошибка: {e}")
+#         await callback.answer("Произошла ошибка при обработке.")
+
+
+async def handle_moderation(callback: CallbackQuery, bot):
+    db = bot.db
+    data = callback.data
+
+    # 1. Проверка формата callback.data
+    if not data.startswith(("approve_", "reject_")):
+        return
+
+    action, event_key = data.split("_", 1)
+
+    try:
+        # 2. Получаем данные из Redis
+        event_data: Dict[str, Any] = await redis_client.hgetall(event_key)
+        if not event_data:
+            await callback.answer("Ошибка: данные не найдены в Redis.")
+            return
+
+        logger.debug(f"[handle_moderation] Получены данные из Redis для {event_key}: {event_data}")
+
+        # 3. Извлекаем и валидируем обязательные поля
+        try:
+            table_name = event_data.get("city")
+            title = event_data.get("title")
+            description = event_data.get("description")
+            start_datetime_str = event_data.get("start_datetime")
+            event_url = event_data.get("event_url")
+            added_by_str = event_data.get("added_by")
+
+            if not all([table_name, title, description, start_datetime_str, event_url, added_by_str]):
+                await callback.answer("Ошибка: отсутствуют обязательные данные.")
+                logger.error(f"[handle_moderation] Неполные данные в Redis для {event_key}: {event_data}")
+                return
+
+            start_datetime = int(start_datetime_str)
+            added_by = int(added_by_str)
+
+        except (ValueError, TypeError) as e:
+            await callback.answer("Ошибка: некорректные данные в Redis.")
+            logger.error(f"[handle_moderation] Ошибка преобразования типов для {event_key}: {e}")
+            return
+
+        user_id = added_by
+
+        # 4. Формируем объект Event_ML из данных Redis
+        try:
+            # Извлекаем дополнительные поля (если есть в Redis)
+            tags_str = event_data.get("tags", "[]")
+            try:
+                tags = json.loads(tags_str)  # предполагаем JSON-строку
+            except json.JSONDecodeError:
+                tags = []
+
+            category = event_data.get("category")
+            age_restriction = event_data.get("age_restriction")
+
+
+        except Exception as e:
+            await callback.answer("Ошибка при формировании данных для анализа.")
+            logger.error(f"[handle_moderation] Ошибка создания Event_ML для {event_key}: {e}")
+            return
+
+        # # 5. Получаем статус-вектор через get_status_vector
+        # try:
+        #     clusters_path = 'C:/Users/arsenii/events_soft/ai/clusters.json'
+        #     if not clusters_path:
+        #         raise ValueError("Переменная окружения CLUSTERS_PATH не задана")
+        #     # Параметры подключения к БД
+        #     DB_DSN = (
+        #         f"dbname={os.getenv('DB_NAME')} "
+        #         f"user={os.getenv('DB_USER')} "
+        #         f"password={os.getenv('DB_PASSWORD')} "
+        #         f"host={os.getenv('DB_HOST')} "
+        #         f"port={os.getenv('DB_PORT')} "
+        #         f"options='-c client_encoding=UTF8'"
+        #     )
+        #     manager = EventManager(
+        #         db_dsn=DB_DSN,
+        #         api_base_url="https://kudago.com/public-api/v1.4",
+        #         clusters_path=clusters_path  # используем переменную
+        #     )
+        #     event_ml = manager.extract_event_fields(event_data)
+        #     raw_result = manager._get_status_vector(event_ml)
+        #                     # Преобразуем в список словарей для JSONB
+        #     status_ml = []
+        #     for cluster_id, score in raw_result:
+        #         status_ml.append({
+        #             "category": cluster_id,
+        #             "score": float(score),  # гарантируем float
+        #             "description": ""  # описание пока пустое (можно дополнить позже)
+        #         })
+
+        #     # Конвертируем в JSON-строку для столбца JSONB
+        #     status_ml = json.dumps(status_ml)
+
+
+
+        # except Exception as e:
+        #     logger.error(f"[handle_moderation] Ошибка при расчёте status_ml для {event_key}: {e}")
+        #     await callback.answer("Ошибка при обработке данных мероприятия. Обратитесь к администратору.")
+        #     return
+
+        # 6. Обрабатываем действие (approve/reject)
+        if action == "approve":
+            await bot.send_message(user_id, "Ваше мероприятие одобрено и опубликовано! 🎉")
+
+
+            success = db.add_event(
+                table_name=table_name,
+                title=title,
+                description=description,
+                start_datetime=start_datetime,
+                event_url=event_url,
+                added_by=added_by,
+                status_ml=None
+            )
+
+            if success:
+                await callback.answer("Мероприятие одобрено и добавлено в базу данных.")
+                logger.info(f"[handle_moderation] Мероприятие {event_key} успешно добавлено в БД")
+            else:
+                await callback.answer("Ошибка при добавлении в базу данных. Обратитесь к администратору.")
+                logger.error(f"[handle_moderation] add_event вернул False для {event_key}")
+
+
+        elif action == "reject":
+            await bot.send_message(user_id, "Ваше мероприятие отклонено. Проверьте данные и попробуйте снова.")
+            await callback.answer("Мероприятие отклонено.")
+
+        # 7. Очищаем Redis
+        await redis_client.delete(event_key)
+        logger.info(f"[handle_moderation] Удалено из Redis: {event_key}")
+
+    except Exception as e:
+        logger.error(f"[handle_moderation] Неожиданная ошибка: {e}")
+        await callback.answer("Произошла ошибка при обработке.")
+
+
+
