@@ -4,13 +4,8 @@ from typing import Optional
 from decouple import config, Config, RepositoryEnv
 import os
 
-print("[DEBUG] Содержимое .env:")
-if os.path.exists('.env'):
-    with open('.env', 'r', encoding='utf-8') as f:
-        for line in f:
-            print(f"!  {line.rstrip()}")
-else:
-    print("  .env не найден!")
+
+
 
 def get_env_source():
     """Определяет источник переменных окружения: .env или os.environ."""
@@ -19,10 +14,8 @@ def get_env_source():
     env_path = os.path.join(current_dir, '.env')
     
     if os.path.isfile(env_path):
-        print(f"[INFO] Используем .env: {env_path}")
         return Config(RepositoryEnv(env_path))
     else:
-        print("[INFO] .env не найден. Используем переменные окружения (os.environ).")
         return config
 
 # Определяем источник конфигурации

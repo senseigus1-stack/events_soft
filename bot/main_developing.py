@@ -27,7 +27,10 @@ from new import (
     confirm_event,
     handle_moderation,
     recommend_main_interest,
-    AddEventStates
+    AddEventStates,
+    help_command,
+    handle_problem_text,
+    HelpState
 )
 
 logger = logging.getLogger(__name__)
@@ -112,6 +115,16 @@ async def main():
         )
         dp.callback_query.register(button_handler, F.data.startswith(("like_", "dislike_", "confirm_", "next_")))
         dp.callback_query.register(handle_show_confirmed_events, F.data.startswith("show_confirmed_events_"))
+        dp.message.register(
+            help_command,
+            Command("help")
+        )
+
+        # Регистрируем обработчик текста проблемы (только в состоянии ожидания)
+        dp.message.register(
+            handle_problem_text,
+            HelpState.waiting_for_problem
+        )
         # dp.callback_query.register(handle_select_event_for_invite, F.data.startswith("invite_to_event_"))
         # dp.callback_query.register(handle_invite_event, F.data.startswith("invite_friend_"))
         # dp.callback_query.register(handle_accept_invite, F.data.startswith("accept_invite_"))

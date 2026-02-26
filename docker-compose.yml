@@ -1,10 +1,13 @@
 version: '3.8'
 
 services:
-  # Сервис бота Telegram
   telegram-bot:
-    build: .
-    command: python bot/main.py
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
       - WEBHOOK_HOST=${WEBHOOK_HOST}
@@ -16,18 +19,50 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=db  # имя сервиса БД
+      - DB_HOST=db
       - DB_PORT=${DB_PORT}
+      - REDIS_HOST=redis
     ports:
-      - "${WEBHOOK_PORT}:${WEBHOOK_PORT}"  # пробрасываем порт
+      - "${WEBHOOK_PORT}:${WEBHOOK_PORT}"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - ./logs/telegram-bot:/app/logs
+      # Монтирование сертификатов, если используются
+      - ${CERT_PATH}:/app/cert.pem:ro
+      - ${KEY_PATH}:/app/key.pem:ro
+    healthcheck:
+      test: >
+        sh -c "
+          if [ '$${USE_HTTPS}' = 'true' ]; then
+            curl -k -f https://localhost:${WEBHOOK_PORT}/health;
+          else
+            curl -f http://localhost:${WEBHOOK_PORT}/health;
+          fi
+        "
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
 
-  # Сервис синхронизации событий
   events-sync:
-    build: .
-    command: python get_all_main.py  # путь крипту синхронизации
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
@@ -35,26 +70,81 @@ services:
       - DB_HOST=db
       - DB_PORT=${DB_PORT}
       - KUDAGO_API_BASE=https://kudago.com/public-api/v1.4
-      - CLUSTERS_PATH=/app/ai/clusters.json  # путь внутри контейнера
-      - SYNC_INTERVAL=1  # часы между синхронизациями
+      - CLUSTERS_PATH=/app/ai/clusters.json
+      - SYNC_INTERVAL=1
+      - REDIS_HOST=redis
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
-
-  # База данных PostgreSQL
-
+    volumes:
+      - ./logs/events-sync:/app/cron_logs
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pgrep cron || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.2'
 
   db:
-    image: postgres:16  # или postgres:latest
+    image: postgres:16
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      # Инициализация БД при первом запуске
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
 
 volumes:
   postgres-data:
+  redis-data:
+
+networks:
+  app-network:
+    driver: bridge

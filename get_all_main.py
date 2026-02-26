@@ -1,13 +1,52 @@
 import logging
 import os
 from kudago import EventManager
+from logging.handlers import RotatingFileHandler
+# Создаём два обработчика с разными файлами
+info_handler = RotatingFileHandler(
+    "/app/logs/events-sync/cron_info.log",
+    maxBytes=10*1024*1024,  # 10 МБ на файл
+    backupCount=2,  # хранить 2 старых файла (всего ~30 МБ)
+    encoding="utf-8"
+)
+
+error_handler = RotatingFileHandler(
+    "/app/logs/events-sync/cron.log",
+    maxBytes=50*1024*1024,  # 50 МБ на файл
+    backupCount=10,  # хранить 10 старых файлов (всего ~550 МБ)
+    encoding="utf-8"
+)
+
+# Настраиваем формат
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+info_handler.setFormatter(formatter)
+error_handler.setFormatter(formatter)
+
+# Фильтр для INFO (только INFO)
+class InfoFilter(logging.Filter):
+    def filter(self, record):
+        return record.levelno == logging.INFO
+
+# Фильтр для ERROR (ERROR и выше: ERROR, CRITICAL)
+class ErrorFilter(logging.Filter):
+    def filter(self, record):
+        return record.levelno >= logging.ERROR
+
+# Применяем фильтры
+info_handler.addFilter(InfoFilter())
+error_handler.addFilter(ErrorFilter())
+
+# Настраиваем логгер
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # собираем все уровни
+
+# Добавляем обработчики
+logger.addHandler(info_handler)
+logger.addHandler(error_handler)
+
+
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
 
     # Параметры подключения к БД
     DB_DSN = (
@@ -39,7 +78,7 @@ if __name__ == "__main__":
         print(upcoming)
 
     except Exception as e:
-        logging.error(f"Execution error: {e}")
+        logger.error(f"Execution error: {e}")
     finally:
         if 'manager' in locals():
             manager.close()

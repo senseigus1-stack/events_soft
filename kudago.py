@@ -1133,7 +1133,7 @@ class EventManager:
         all_ids = []
         page = 1
         retry_count = 0
-        max_retries = 3
+        max_retries = 5
 
         while True:
             try:
@@ -1148,7 +1148,7 @@ class EventManager:
                 response = self.api.session.get(
                     f"{self.api.base_url}/places/",
                     params=params,
-                    timeout=15
+                    timeout=25
                 )
 
                 if response.status_code == 200:
@@ -1195,7 +1195,7 @@ class EventManager:
                 logging.error(f"Превышено количество попыток ({max_retries}) для страницы {page}. Завершаем.")
                 break
 
-            time.sleep(0.5)  # Пауза между запросами
+            time.sleep(1)  # Пауза между запросами
 
         return all_ids
 

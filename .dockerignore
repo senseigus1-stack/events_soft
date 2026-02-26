@@ -1,0 +1,32 @@
+
+# Временные и служебные файлы ОС
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Логи и кэш
+*.log
+.cache/
+.tmp/
+tmp/
+
+# Резервные копии
+*~
+*.bak
+
+# Файлы IDE и редакторов
+.vscode/
+.idea/
+*.swp
+*.swo
+
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+
+venv/

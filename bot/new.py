@@ -1577,94 +1577,6 @@ async def confirm_event(message: Message, bot, state: FSMContext):
         logger.error(f"[confirm_event] Неожиданная ошибка при отправке админу: {e}")
         await message.answer("Произошла ошибка при отправке сообщения админу.")
 
-# async def handle_moderation(callback: CallbackQuery, bot):
-#     db = bot.db
-#     data = callback.data
-#     if not data.startswith(("approve_", "reject_")):
-#         return
-
-#     action, event_key = data.split("_", 1)
-
-#     try:
-#         # Получаем данные из Redis
-#         event_data = await redis_client.hgetall(event_key)
-#         if not event_data:
-#             await callback.answer("Ошибка: данные не найдены в Redis.")
-#             return
-
-#         # Извлекаем поля для передачи в add_event
-#         try:
-#             table_name = event_data.get("city")  # Предполагаем, что "city" → "msk"/"spb"
-#             title = event_data.get("title")
-#             description = event_data.get("description")
-#             start_datetime_str = event_data.get("start_datetime")
-#             event_url = event_data.get("event_url")
-#             added_by_str = event_data.get("added_by")
-
-#             # Валидация обязательных полей
-#             if not all([table_name, title, description, start_datetime_str, event_url, added_by_str]):
-#                 await callback.answer("Ошибка: отсутствуют обязательные данные.")
-#                 logger.error(f"[handle_moderation] Неполные данные в Redis для {event_key}: {event_data}")
-#                 return
-
-#             # Преобразуем типы
-#             start_datetime = int(start_datetime_str)
-#             added_by = int(added_by_str)
-
-#         except (ValueError, TypeError) as e:
-#             await callback.answer("Ошибка: некорректные данные в Redis.")
-#             logger.error(f"[handle_moderation] Ошибка преобразования типов для {event_key}: {e}")
-#             return
-
-#         user_id = added_by  # ID пользователя, который добавил мероприятие
-
-#         if action == "approve":
-#             # Отправляем уведомление пользователю
-#             await bot.send_message(
-#                 user_id,
-#                 "Ваше мероприятие одобрено и опубликовано! 🎉"
-#             )
-#             clusters_path = os.getenv('CLUSTERS_PATH')
-#             event_manager = EventManager(
-#                 db_dsn="",  # можно пустой, т.к. БД не используется
-#                 clusters_path=clusters_path
-#             )
-#             # Вызываем add_event с извлечёнными аргументами
-#             success = db.add_event(
-#                 table_name=table_name,
-#                 title=title,
-#                 description=description,
-#                 start_datetime=start_datetime,
-#                 event_url=event_url,
-#                 added_by=added_by,
-#                 status_ml=status_ml
-#             )
-
-#             if success:
-#                 await callback.answer("Мероприятие одобрено и добавлено в базу данных.")
-#                 logger.info(f"[handle_moderation] Мероприятие {event_key} успешно добавлено в БД")
-#             else:
-#                 await callback.answer("Ошибка при добавлении в базу данных. Обратитесь к администратору.")
-#                 logger.error(f"[handle_moderation] add_event вернул False для {event_key}")
-
-
-#         elif action == "reject":
-#             # Отклонение: отправляем уведомление
-#             await bot.send_message(
-#                 user_id,
-#                 "Ваше мероприятие отклонено. Проверьте данные и попробуйте снова."
-#             )
-#             await callback.answer("Мероприятие отклонено.")
-
-#         # Удаляем запись из Redis (независимо от действия)
-#         await redis_client.delete(event_key)
-#         logger.info(f"[handle_moderation] Удалено из Redis: {event_key}")
-
-
-#     except Exception as e:
-#         logger.error(f"[handle_moderation] Неожиданная ошибка: {e}")
-#         await callback.answer("Произошла ошибка при обработке.")
-
 
 async def handle_moderation(callback: CallbackQuery, bot):
     db = bot.db
@@ -1727,45 +1639,6 @@ async def handle_moderation(callback: CallbackQuery, bot):
             logger.error(f"[handle_moderation] Ошибка создания Event_ML для {event_key}: {e}")
             return
 
-        # # 5. Получаем статус-вектор через get_status_vector
-        # try:
-        #     clusters_path = 'C:/Users/arsenii/events_soft/ai/clusters.json'
-        #     if not clusters_path:
-        #         raise ValueError("Переменная окружения CLUSTERS_PATH не задана")
-        #     # Параметры подключения к БД
-        #     DB_DSN = (
-        #         f"dbname={os.getenv('DB_NAME')} "
-        #         f"user={os.getenv('DB_USER')} "
-        #         f"password={os.getenv('DB_PASSWORD')} "
-        #         f"host={os.getenv('DB_HOST')} "
-        #         f"port={os.getenv('DB_PORT')} "
-        #         f"options='-c client_encoding=UTF8'"
-        #     )
-        #     manager = EventManager(
-        #         db_dsn=DB_DSN,
-        #         api_base_url="https://kudago.com/public-api/v1.4",
-        #         clusters_path=clusters_path  # используем переменную
-        #     )
-        #     event_ml = manager.extract_event_fields(event_data)
-        #     raw_result = manager._get_status_vector(event_ml)
-        #                     # Преобразуем в список словарей для JSONB
-        #     status_ml = []
-        #     for cluster_id, score in raw_result:
-        #         status_ml.append({
-        #             "category": cluster_id,
-        #             "score": float(score),  # гарантируем float
-        #             "description": ""  # описание пока пустое (можно дополнить позже)
-        #         })
-
-        #     # Конвертируем в JSON-строку для столбца JSONB
-        #     status_ml = json.dumps(status_ml)
-
-
-
-        # except Exception as e:
-        #     logger.error(f"[handle_moderation] Ошибка при расчёте status_ml для {event_key}: {e}")
-        #     await callback.answer("Ошибка при обработке данных мероприятия. Обратитесь к администратору.")
-        #     return
 
         # 6. Обрабатываем действие (approve/reject)
         if action == "approve":
@@ -1804,3 +1677,73 @@ async def handle_moderation(callback: CallbackQuery, bot):
 
 
 
+# Определяем состояния для диалога
+class HelpState(StatesGroup):
+    waiting_for_problem = State()
+
+async def help_command(message: Message, state: FSMContext):
+    """
+    Обрабатывает команду /help — запрашивает у пользователя описание проблемы.
+    """
+    # Отправляем сообщение с просьбой описать проблему
+    await message.reply(
+        "Пожалуйста, опишите вашу проблему или вопрос.\n"
+        "Я передам это администратору."
+    )
+    # Переводим пользователя в состояние ожидания текста проблемы
+    await state.set_state(HelpState.waiting_for_problem)
+
+async def handle_problem_text(message: Message, state: FSMContext, bot):
+    """
+    Обрабатывает текст проблемы, отправленный пользователем после команды /help.
+    Отправляет описание проблемы админу вместе с данными пользователя.
+    """
+    user = message.from_user
+    user_id = user.id
+    username = user.username or "не указан"
+    first_name = user.first_name or ""
+    last_name = user.last_name or ""
+    full_name = f"{first_name} {last_name}".strip() or "Неизвестно"
+
+    problem_text = message.text.strip()
+
+    if not problem_text:
+        await message.reply("Текст проблемы не может быть пустым. Пожалуйста, опишите вашу ситуацию.")
+        return
+
+    # ID админа (замените на реальный ID)
+    admin_id = int(Config.ADMIN_IDS)
+
+    # Формируем сообщение для админа
+    admin_message = (
+        f"<b>Новая проблема от пользователя</b>\n\n"
+        f"<b>ID пользователя:</b> {user_id}\n"
+        f"<b>Username:</b> @{username}\n"
+        f"<b>Имя:</b> {full_name}\n\n"
+        f"<b>Описание проблемы:</b>\n{problem_text}"
+    )
+
+    try:
+        # Отправляем сообщение админу
+        await bot.send_message(
+            chat_id=admin_id,
+            text=admin_message,
+            parse_mode="HTML"
+        )
+        logger.info(f"[handle_problem_text] Проблема от пользователя {user_id} отправлена админу.")
+
+        # Завершаем состояние
+        await state.clear()
+
+        # Отвечаем пользователю
+        await message.reply(
+            "Ваше сообщение отправлено администратору.\n"
+            "Мы постараемся разобраться в проблеме как можно скорее."
+        )
+
+    except Exception as e:
+        logger.error(f"[handle_problem_text] Ошибка при отправке сообщения админу: {e}")
+        await message.reply(
+            "Произошла ошибка при отправке сообщения администратору.\n"
+            "Пожалуйста, попробуйте ещё раз позже."
+        )
