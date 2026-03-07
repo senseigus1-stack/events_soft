@@ -11,7 +11,11 @@ logger = logging.getLogger(__name__)
 class Vectorizer:
     def __init__(self):
         try:
-            self.model = SentenceTransformer(Config.MODEL_NAME)
+            self.model = SentenceTransformer(
+                Config.MODEL_NAME,
+                device='cpu',
+                tokenizer_kwargs={'truncation': True, 'max_length': 512}
+            )
             self.dimension = self.model.get_sentence_embedding_dimension()
         except Exception as e:
             raise RuntimeError(f"Не удалось загрузить модель {Config.MODEL_NAME}: {e}")

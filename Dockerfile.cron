@@ -1,37 +1,31 @@
 FROM python:3.11-slim
 
 LABEL maintainer="clegpscb@gmail.com"
+LABEL description="Telegram bot with aiogram and webhooks"
 
 WORKDIR /app
 
-# Установка cron и зависимостей
-RUN apt-get update && apt-get install -y cron && rm -rf /var/lib/apt/lists/*
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3-dev \
+    libopenblas-dev \
+    ca-certificates \
+    libffi-dev \
+    libssl-dev \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Установка Python‑зависимостей
+# Обновление pip
+RUN pip install --upgrade pip
+
+# Копирование файла зависимостей и их установка
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копирование кода и скриптов
+# Копирование кода
 COPY . .
 
-# Настройка cron
-COPY cronjob /etc/cron.d/events-sync
-RUN chmod 0644 /etc/cron.d/events-sync && \
-    chown root:root /etc/cron.d/events-sync && \
-    # Убедимся, что файл заканчивается новой строкой
-    echo "" >> /etc/cron.d/events-sync
 
-RUN chmod +x /app/get_all_main.py
-
-# Создание лог‑файла с безопасными правами
-RUN touch /var/log/cron.log && chmod 644 /var/log/cron.log
-
-# Перенаправление логов cron в stdout для видимости в docker logs
-RUN ln -sf /dev/stdout /var/log/cron.log
-
-# Копирование entrypoint
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
-ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["cron", "-f"]
+# Запуск бота
+CMD ["python", "get_all_main.py"]

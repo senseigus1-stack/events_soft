@@ -37,14 +37,14 @@ from scheduled import setup_scheduler, scheduler
 
 # Создаём два обработчика с разными файлами
 info_handler = RotatingFileHandler(
-    "bot_info.log",
+    "/app/logs/bot_info.log",
     maxBytes=10*1024*1024,  # 10 МБ на файл
     backupCount=2,  # хранить 2 старых файла (всего ~30 МБ)
     encoding="utf-8"
 )
 
 error_handler = RotatingFileHandler(
-    "/app/logs/bot.log",
+    "/app/logs/bot_error.log",
     maxBytes=50*1024*1024,  # 50 МБ на файл
     backupCount=10,  # хранить 10 старых файлов (всего ~550 МБ)
     encoding="utf-8"
@@ -83,22 +83,27 @@ bot = Bot(token=CONFIG.TELEGRAM_TOKEN)
 async def on_startup(app: web.Application):
     """Действия при запуске сервера."""
     try:
-        # Инициализация сервисов
+        # Инициализация сервисов (без загрузки модели)
         bot.db = Database_Users()
-        bot.ml = MLService()
+        bot.ml = MLService()  # Создаём экземпляр без загрузки модели
+
+        # Установка вебхука
+        webhook_url = f"http://{CONFIG.WEBHOOK_HOST}:{CONFIG.WEBHOOK_PORT}{CONFIG.WEBHOOK_PATH}"
+        await bot.set_webhook(url=webhook_url)
+        logger.info(f"Бот запущен. Вебхук установлен: {webhook_url}")
+
+        # Безопасная инициализация ML-сервиса ПОСЛЕ установки вебхука
+        await bot.ml.initialize()
+        logger.info("MLService успешно инициализирован")
 
         # Запуск планировщика напоминаний
         setup_scheduler(bot, bot.db)
         logger.info("Планировщик напоминаний инициализирован")
 
-        # Установка вебхука
-        webhook_url = f"https://{CONFIG.WEBHOOK_HOST}:{CONFIG.WEBHOOK_PORT}{CONFIG.WEBHOOK_PATH}"
-        await bot.set_webhook(url=webhook_url)
-        logger.info(f"Бот запущен. Вебхук установлен: {webhook_url}")
-
     except Exception as e:
         logger.error(f"Ошибка при старте: {e}", exc_info=True)
         raise
+
 
 async def on_shutdown(app: web.Application):
     """Действия при остановке сервера."""
@@ -139,9 +144,10 @@ def setup_routes():
     app.router.add_get("/health", health_handler)  # Добавляем healthcheck
     logger.info(f"Маршруты настроены: POST /{path}, GET /health")
 
+
 async def main():
     try:
-        # Регистрация хендлеров (без StateFilter — aiogram 3.x стиль)
+        # Регистрация хендлеров
         dp.message.register(start, Command("start"))
 
         # Обработка выбора города
@@ -158,7 +164,7 @@ async def main():
         # Команда /add
         dp.message.register(add_event_command, Command("add"))
 
-        # Обработка состояний (без StateFilter)
+        # Обработка состояний
         dp.message.register(process_city, AddEventStates.wait_city)
         dp.message.register(process_title, AddEventStates.wait_title)
         dp.message.register(process_description, AddEventStates.wait_description)

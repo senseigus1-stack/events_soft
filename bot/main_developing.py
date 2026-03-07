@@ -1,5 +1,6 @@
 
 import asyncio
+from logging.handlers import RotatingFileHandler
 import logging
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import Command, StateFilter
@@ -33,7 +34,46 @@ from new import (
     HelpState
 )
 
+# Создаём два обработчика с разными файлами
+info_handler = RotatingFileHandler(
+    "/app/logs/bot_info.log",
+    maxBytes=10*1024*1024,  # 10 МБ на файл
+    backupCount=2,  # хранить 2 старых файла (всего ~30 МБ)
+    encoding="utf-8"
+)
+
+error_handler = RotatingFileHandler(
+    "/app/logs/bot_error.log",
+    maxBytes=50*1024*1024,  # 50 МБ на файл
+    backupCount=10,  # хранить 10 старых файлов (всего ~550 МБ)
+    encoding="utf-8"
+)
+
+# Настраиваем формат
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+info_handler.setFormatter(formatter)
+error_handler.setFormatter(formatter)
+
+# Фильтр для INFO (только INFO)
+class InfoFilter(logging.Filter):
+    def filter(self, record):
+        return record.levelno == logging.INFO
+
+# Фильтр для ERROR (ERROR и выше: ERROR, CRITICAL)
+class ErrorFilter(logging.Filter):
+    def filter(self, record):
+        return record.levelno >= logging.ERROR
+
+# Применяем фильтры
+info_handler.addFilter(InfoFilter())
+error_handler.addFilter(ErrorFilter())
+
+# Настраиваем логгер
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # собираем все уровни
+logger.addHandler(info_handler)
+logger.addHandler(error_handler)
+
 
 
 async def main():
@@ -45,104 +85,108 @@ async def main():
     bot = Bot(token=CONFIG.TELEGRAM_TOKEN)
     dp = Dispatcher()
 
-    # Прикрепление зависимостей к боту
+    # Прикрепление зависимостей к боту (без инициализации ML-модели)
     bot.db = Database_Users()
-    bot.ml = MLService()
+    bot.ml = MLService()  # Создаём экземпляр без загрузки модели
 
     try:
         # Запуск планировщика
-        setup_scheduler(bot, bot.db)
+        global scheduler
+        scheduler = setup_scheduler(bot, bot.db)
         logger.info("Планировщик запущен")
 
+        # Регистрация обработчиков команд и сообщений
         dp.message.register(start, Command("start"))
 
-        # 2. Обработка выбора города (только для сообщений с текстом из списка)
+        # Обработка выбора города
         dp.message.register(
             handle_city_selection,
             F.text.in_(["Москва", "Санкт‑Петербург", "Оба города"])
         )
+
         dp.message.register(recommend_main_interest, Command("main"))
         dp.message.register(show_main_menu, Command("menu"))
         dp.message.register(recommend, Command("recommend"))
         dp.message.register(show_referral, Command("referral"))
-        # dp.message.register(my_friends, Command("myfriends"))
-        # dp.message.register(friend_events, Command("friendevents"))
-# 1. Команда /add (старт)
+
+        # Команда /add (старт)
         dp.message.register(
             add_event_command,
             Command("add")
         )
 
-        # 2. Обработка выбора города (состояние wait_city)
+        # Последовательная обработка добавления события
         dp.message.register(
             process_city,
-            StateFilter(AddEventStates.wait_city)
+            (AddEventStates.wait_city)
         )
-
-        # 3. Обработка названия (состояние wait_title)
         dp.message.register(
             process_title,
-            StateFilter(AddEventStates.wait_title)
+            (AddEventStates.wait_title)
         )
-
-        # 4. Обработка описания (состояние wait_description)
         dp.message.register(
             process_description,
-            StateFilter(AddEventStates.wait_description)
+            (AddEventStates.wait_description)
         )
-
-        # 5. Обработка даты/времени (состояние wait_datetime)
         dp.message.register(
             process_datetime,
-            StateFilter(AddEventStates.wait_datetime)
+            (AddEventStates.wait_datetime)
         )
-
-        # 6. Обработка URL (состояние wait_url)
         dp.message.register(
             process_url,
-            StateFilter(AddEventStates.wait_url)
+            (AddEventStates.wait_url)
         )
-
-        # 7. Подтверждение (состояние confirm)
         dp.message.register(
             confirm_event,
-            StateFilter(AddEventStates.confirm)
+            (AddEventStates.confirm)
         )
 
+        # Обработчики callback-запросов
         dp.callback_query.register(
             handle_moderation,
             F.data.startswith(("approve_", "reject_"))
         )
-        dp.callback_query.register(button_handler, F.data.startswith(("like_", "dislike_", "confirm_", "next_")))
-        dp.callback_query.register(handle_show_confirmed_events, F.data.startswith("show_confirmed_events_"))
+        dp.callback_query.register(
+            button_handler,
+            F.data.startswith(("like_", "dislike_", "confirm_", "next_"))
+        )
+        dp.callback_query.register(
+            handle_show_confirmed_events,
+            F.data.startswith("show_confirmed_events_")
+        )
+
+        # Команда помощи
         dp.message.register(
             help_command,
             Command("help")
         )
 
-        # Регистрируем обработчик текста проблемы (только в состоянии ожидания)
+        # Обработчик текста проблемы
         dp.message.register(
             handle_problem_text,
             HelpState.waiting_for_problem
         )
-        # dp.callback_query.register(handle_select_event_for_invite, F.data.startswith("invite_to_event_"))
-        # dp.callback_query.register(handle_invite_event, F.data.startswith("invite_friend_"))
-        # dp.callback_query.register(handle_accept_invite, F.data.startswith("accept_invite_"))
-        # dp.callback_query.register(handle_decline_invite, F.data.startswith("decline_invite_"))
-
 
         logger.info("Бот запущен. Ожидаем сообщения (polling)...")
 
-        # Запуск polling
-        await dp.start_polling(bot)
+        # ЗАПУСК POLLING В ОТДЕЛЬНОЙ ЗАДАЧЕ
+        polling_task = asyncio.create_task(dp.start_polling(bot))
+
+        # Асинхронная инициализация ML-сервиса ПОСЛЕ старта polling
+        await bot.ml.initialize()
+
+        # Ждём завершения polling (если нужно)
+        await polling_task
 
     except Exception as e:
         logger.error(f"Критическая ошибка в main(): {e}", exc_info=True)
+        raise
     finally:
         # Корректное завершение планировщика
         if scheduler and scheduler.running:
             scheduler.shutdown()
             logger.info("Планировщик остановлен")
+
         # Закрытие сессий бота
         await bot.session.close()
         logger.info("Бот остановлен.")

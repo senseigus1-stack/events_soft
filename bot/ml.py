@@ -5,19 +5,11 @@ from sentence_transformers import SentenceTransformer
 from redis import Redis
 import json
 from config import Config
-
+import os
 import logging
 from datetime import datetime
 
-# Настраиваем логгер
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(levelname)s | %(message)s',
-    handlers=[
-        logging.FileHandler("status_updates.log", encoding="utf-8")
-    ]
-)
-logger = logging.getLogger(__name__)
+
 
 class RNNModel(nn.Module):
     def __init__(self, input_size, hidden_size=64, num_layers=2):
@@ -30,15 +22,38 @@ class RNNModel(nn.Module):
         out, _ = self.lstm(x)
         return self.fc(out[:, -1, :])
 
+
+cache_dir = '/app/.cache/huggingface'
+os.makedirs(cache_dir, exist_ok=True)
+
 class MLService:
     def __init__(self):
-        self.model = SentenceTransformer(Config.MODEL_NAME)
+        self.model = None
         self.redis = Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT)
         self.rnn = RNNModel(input_size=384)
         self.optimizer = torch.optim.Adam(self.rnn.parameters(), lr=0.001)
-        self.criterion = nn.MSELoss()
+        self.criterion = nn.MSELoss()        
+        self._is_ready = False
 
 
+    async def initialize(self):
+        """Асинхронная инициализация модели"""
+        if self._is_ready:
+            return
+
+        try:
+            from sentence_transformers import SentenceTransformer
+            self.model = SentenceTransformer(Config.MODEL_NAME)
+            self._is_ready = True
+            logging.info("MLService успешно инициализирован")
+        except Exception as e:
+            logging.error(f"Ошибка загрузки модели MLService: {e}", exc_info=True)
+            raise
+
+    @property
+    def is_ready(self) -> bool:
+        return self._is_ready
+    
     def _cache_key(self, text: str) -> str:
         return f'vec:{hash(text) % 1000000}'
 
@@ -135,7 +150,7 @@ class MLService:
     
     def update_user_status_ml(self, user_status: list, event_status: list, weight: float) -> list:
         # Логируем исходное состояние
-        logger.info(
+        logging.info(
             "Обновление статуса пользователя. "
             f"Исходный статус: {user_status}, "
             f"Событие: {event_status}, вес: {weight}"
@@ -162,7 +177,7 @@ class MLService:
                 })
 
         # Логируем результат
-        logger.info(
+        logging.info(
             f"Обновлённый статус: {updated_status}"
         )
         return updated_status

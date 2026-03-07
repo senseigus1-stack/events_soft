@@ -9,7 +9,7 @@ from datetime import timedelta
 import time
 import pytz  # Для явного указания часового пояса
 from ml import MLService
-
+import asyncio
 # Настраиваем логгер
 logging.basicConfig(
     level=logging.INFO,

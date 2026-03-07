@@ -4,14 +4,14 @@ from kudago import EventManager
 from logging.handlers import RotatingFileHandler
 # Создаём два обработчика с разными файлами
 info_handler = RotatingFileHandler(
-    "/app/logs/events-sync/cron_info.log",
+    "/app/logs/cron_info.log",
     maxBytes=10*1024*1024,  # 10 МБ на файл
     backupCount=2,  # хранить 2 старых файла (всего ~30 МБ)
     encoding="utf-8"
 )
 
 error_handler = RotatingFileHandler(
-    "/app/logs/events-sync/cron.log",
+    "/app/logs/cron.log",
     maxBytes=50*1024*1024,  # 50 МБ на файл
     backupCount=10,  # хранить 10 старых файлов (всего ~550 МБ)
     encoding="utf-8"
