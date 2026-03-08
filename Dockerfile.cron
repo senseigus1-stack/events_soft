@@ -1,31 +1,18 @@
-FROM python:3.11-slim
+# Используем тот же базовый образ с зависимостями
+FROM bot-dependencies:latest
 
 LABEL maintainer="clegpscb@gmail.com"
-LABEL description="Telegram bot with aiogram and webhooks"
+LABEL description="Events sync cron service using pre‑installed dependencies"
 
 WORKDIR /app
 
-# Установка системных зависимостей
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    python3-dev \
-    libopenblas-dev \
-    ca-certificates \
-    libffi-dev \
-    libssl-dev \
-    libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Обновление pip
-RUN pip install --upgrade pip
-
-# Копирование файла зависимостей и их установка
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Копирование кода
+# Копируем код приложения
 COPY . .
 
 
-# Запуск бота
+
+# Настраиваем PYTHONPATH
+ENV PYTHONPATH=/dependencies/lib/python3.11/site-packages:$PYTHONPATH
+
+# Запуск cron‑сервиса
 CMD ["python", "get_all_main.py"]

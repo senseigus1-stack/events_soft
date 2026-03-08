@@ -1,0 +1,22 @@
+# Используем образ с зависимостями как основу
+FROM bot-dependencies:latest
+
+
+LABEL maintainer="clegpscb@gmail.com"
+LABEL description="Telegram bot using pre‑installed dependencies"
+
+WORKDIR /app
+
+# Копируем код приложения
+COPY . .
+
+
+
+# Настраиваем PYTHONPATH для доступа к зависимостям
+ENV PYTHONPATH=/dependencies/lib/python3.11/site-packages:$PYTHONPATH
+
+# Открываем порт для вебхуков
+EXPOSE ${WEBHOOK_PORT:-8443}
+
+# Запуск бота
+CMD ["python", "bot/main_developing.py"]
