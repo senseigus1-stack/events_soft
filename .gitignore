@@ -8,3 +8,5 @@ certs/
 .ppk
 .pub
 data/
+key.ppk
+key.pub
