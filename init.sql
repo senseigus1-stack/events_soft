@@ -174,6 +174,6 @@ COMMENT ON FUNCTION create_city_eventtables(TEXT) IS 'Создаёт табли�
 SELECT create_city_eventtables('msk');
 SELECT create_city_eventtables('spb');
 
--- Предоставление прав (опционально)
+ 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${DB_USER};
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${DB_USER};

@@ -16,7 +16,7 @@ COPY . .
 ENV PYTHONPATH=/dependencies/lib/python3.11/site-packages:$PYTHONPATH
 
 # Открываем порт для вебхуков
-EXPOSE ${WEBHOOK_PORT:-8443}
+EXPOSE ${WEBHOOK_PORT:-443}
 
 # Запуск бота
-CMD ["python", "bot/main_developing.py"]
+CMD ["python", "bot/main.py"]

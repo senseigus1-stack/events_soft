@@ -1,7 +1,10 @@
 get.py
 .env
 venv/
+logs/
 __pycache__/
 .log
-logs/
 certs/
+.ppk
+.pub
+data/
