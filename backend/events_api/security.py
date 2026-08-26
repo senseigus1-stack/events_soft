@@ -10,6 +10,12 @@ from fastapi import Depends, Header, HTTPException
 from .config import Settings, get_settings
 
 
+def signing_settings(settings: Settings) -> Settings:
+    if settings.app_secret:
+        return settings
+    return settings.model_copy(update={"app_secret": "development-only"})
+
+
 def _encode(value: bytes) -> str:
     return base64.urlsafe_b64encode(value).decode().rstrip("=")
 
@@ -57,3 +63,10 @@ def require_user(
     scheme, _, token = authorization.partition(" ")
     if scheme.casefold() != "bearer" or not verify_user_token(token, user_id, settings):
         raise HTTPException(status_code=401, detail="invalid_user_token")
+
+
+def verify_authorization(authorization: str, user_id: str, settings: Settings) -> bool:
+    scheme, _, token = authorization.partition(" ")
+    return scheme.casefold() == "bearer" and verify_user_token(
+        token, user_id, signing_settings(settings)
+    )

@@ -1,5 +1,6 @@
 import type {
-  City, DiscussionSpace, EventItem, EventSubmission, Friend, NotificationItem, Plan,
+  City, DiscussionSpace, EventItem, EventSubmission, Friend, NotificationItem,
+  OAuthProvider, Plan, Profile,
 } from "./types";
 
 const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
@@ -20,6 +21,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function bootstrapSession() {
+  const callback = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const callbackToken = callback.get("auth_token");
+  const callbackUserId = callback.get("user_id");
+  if (callbackToken && callbackUserId) {
+    localStorage.setItem("vayobyzh-user-id", callbackUserId);
+    localStorage.setItem("vayobyzh-user-token", callbackToken);
+    localStorage.setItem("vayobyzh-auth-provider", callback.get("provider") ?? "oauth");
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    return callbackUserId;
+  }
   const existingId = localStorage.getItem("vayobyzh-user-id");
   const existingToken = localStorage.getItem("vayobyzh-user-token");
   if (existingId && existingToken) return existingId;
@@ -27,6 +38,25 @@ export async function bootstrapSession() {
   localStorage.setItem("vayobyzh-user-id", session.user_id);
   localStorage.setItem("vayobyzh-user-token", session.token);
   return session.user_id;
+}
+
+export const fetchProfile = (userId: string) => request<Profile>(`/api/v1/users/${encodeURIComponent(userId)}/profile`);
+
+export const fetchAuthProviders = () => request<OAuthProvider[]>("/api/v1/auth/providers");
+
+export async function startOAuth(provider: OAuthProvider["id"], userId: string) {
+  const response = await request<{ authorization_url: string }>(`/api/v1/auth/oauth/${provider}/start`, {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId }),
+  });
+  window.location.assign(response.authorization_url);
+}
+
+export function signOut() {
+  localStorage.removeItem("vayobyzh-user-id");
+  localStorage.removeItem("vayobyzh-user-token");
+  localStorage.removeItem("vayobyzh-auth-provider");
+  window.location.reload();
 }
 
 export const fetchCities = () => request<City[]>("/api/v1/cities");

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
@@ -24,8 +25,9 @@ from .community import (
     submit_event,
     update_profile,
 )
-from .security import issue_user_token, require_user
+from .security import issue_user_token, require_user, signing_settings
 from .models import City, Event, User
+from .oauth import ProviderId, configured_providers, finish_oauth, start_oauth
 from .schemas import (
     AuthSessionRead,
     AttendanceRead,
@@ -44,6 +46,9 @@ from .schemas import (
     InterestWrite,
     ModerationWrite,
     NotificationRead,
+    OAuthProviderRead,
+    OAuthStartRead,
+    OAuthStartWrite,
     ProfileRead,
     ProfileWrite,
     RecommendationList,
@@ -70,13 +75,56 @@ def create_session(
     user_id = str(uuid4())
     ensure_user(session, user_id)
     session.commit()
-    signing_settings = settings
-    if not settings.app_secret:
-        signing_settings = settings.model_copy(update={"app_secret": "development-only"})
     return AuthSessionRead(
         user_id=user_id,
-        token=issue_user_token(user_id, signing_settings),
+        token=issue_user_token(user_id, signing_settings(settings)),
     )
+
+
+@router.get(
+    "/api/v1/auth/providers",
+    response_model=list[OAuthProviderRead],
+    tags=["people"],
+)
+def auth_providers(settings: Settings = Depends(get_settings)) -> list[dict[str, str | bool]]:
+    return configured_providers(settings)
+
+
+@router.post(
+    "/api/v1/auth/oauth/{provider_id}/start",
+    response_model=OAuthStartRead,
+    tags=["people"],
+)
+def begin_oauth(
+    provider_id: ProviderId,
+    payload: OAuthStartWrite,
+    authorization: str = Header(default=""),
+    session: Session = Depends(get_session),
+    settings: Settings = Depends(get_settings),
+) -> OAuthStartRead:
+    return OAuthStartRead(
+        authorization_url=start_oauth(
+            session,
+            provider_id,
+            settings,
+            user_id=payload.user_id,
+            authorization=authorization,
+        )
+    )
+
+
+@router.get("/api/v1/auth/oauth/{provider_id}/callback", tags=["people"])
+async def oauth_callback(
+    provider_id: ProviderId,
+    code: str = Query(min_length=1, max_length=2048),
+    state: str = Query(min_length=20, max_length=256),
+    session: Session = Depends(get_session),
+    settings: Settings = Depends(get_settings),
+) -> RedirectResponse:
+    location = await finish_oauth(
+        session, provider_id, settings, code=code, state=state
+    )
+    return RedirectResponse(location, status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/api/v1/cities", response_model=list[CityRead], tags=["events"])

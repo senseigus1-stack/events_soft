@@ -21,6 +21,15 @@ class Settings(BaseSettings):
     public_api_url: str = "http://localhost:8000"
     app_secret: str = ""
     auth_token_days: int = Field(default=365, ge=1, le=3650)
+    oauth_public_base_url: str = "http://localhost:8000"
+    oauth_frontend_url: str = "http://localhost:5173"
+    oauth_state_minutes: int = Field(default=10, ge=3, le=30)
+    google_oauth_client_id: str = ""
+    google_oauth_client_secret: str = ""
+    yandex_oauth_client_id: str = ""
+    yandex_oauth_client_secret: str = ""
+    github_oauth_client_id: str = ""
+    github_oauth_client_secret: str = ""
     sync_api_key: str = ""
     admin_api_key: str = ""
     kudago_base_url: str = "https://kudago.com/public-api/v1.4"

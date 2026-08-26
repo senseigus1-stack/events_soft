@@ -45,6 +45,12 @@ export type Profile = {
   avatar_url: string;
 };
 
+export type OAuthProvider = {
+  id: "google" | "yandex" | "github";
+  name: string;
+  available: boolean;
+};
+
 export type Friend = {
   id: number;
   status: string;

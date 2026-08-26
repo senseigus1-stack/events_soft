@@ -19,6 +19,20 @@ class AuthSessionRead(BaseModel):
     token: str
 
 
+class OAuthProviderRead(BaseModel):
+    id: Literal["google", "yandex", "github"]
+    name: str
+    available: bool
+
+
+class OAuthStartWrite(BaseModel):
+    user_id: str | None = Field(default=None, max_length=128)
+
+
+class OAuthStartRead(BaseModel):
+    authorization_url: str
+
+
 class EventRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
