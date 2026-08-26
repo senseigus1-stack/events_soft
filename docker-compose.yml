@@ -1,128 +1,99 @@
+name: vayobyzh
+
 services:
-  dependencies:
-    build:
-      context: .
-      dockerfile: Dockerfile.dependencies
-    # Убираем volume — зависимости копируются через --from, а не монтируются
-
-  events-sync:
-    build:
-      context: .
-      dockerfile: Dockerfile.cron
-    container_name: events-sync-cron
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    restart: unless-stopped
-    environment:
-      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-      - WEBHOOK_HOST=${WEBHOOK_HOST}
-      - WEBHOOK_PORT=${WEBHOOK_PORT}
-      - WEBHOOK_PATH=${WEBHOOK_PATH}
-      - USE_HTTPS=${USE_HTTPS}
-      - CERT_PATH=${CERT_PATH}
-      - KEY_PATH=${KEY_PATH}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=db
-      - DB_PORT=${DB_PORT}
-      - REDIS_HOST=redis
-      - REDIS_PORT=${REDIS_PORT}
-      - POSTGRES_URI=${POSTGRES_URI}
-      - MODEL_NAME=${MODEL_NAME}
-      - CACHE_TTL=${CACHE_TTL}
-      - BATCH_SIZE=${BATCH_SIZE}
-      - TOP_K=${TOP_K}
-      - SIMILARITY_THRESHOLD=${SIMILARITY_THRESHOLD}
-      - CLUSTERS_PATH=${CLUSTERS_PATH}
-      - ADMIN_IDS=${ADMIN_IDS}
-      - DELIMETER_PERCENT_ADDED=${DELIMETER_PERCENT_ADDED}
-    volumes:
-      - ./logs:/app/logs
-      - ./data:/app/data
-    depends_on:
-      - db
-      - redis
-    networks:
-      - app-network
-
   db:
-    image: postgres:15
-    container_name: postgres_db
+    image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-events}
+      POSTGRES_USER: ${POSTGRES_USER:-events}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
-    networks:
-      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [internal]
 
-  redis:
-    image: redis:7-alpine
-    container_name: redis_cache
+  api:
+    build: ./backend
     restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - app-network
+    environment: &app-env
+      ENVIRONMENT: production
+      APP_SECRET: ${APP_SECRET:?Set APP_SECRET in .env}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-events}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-events}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      SYNC_API_KEY: ${SYNC_API_KEY:?Set SYNC_API_KEY in .env}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:?Set ADMIN_API_KEY in .env}
+      SYNC_CITY_SLUGS: ${SYNC_CITY_SLUGS:-msk,spb,ekb,kzn,nsk}
+      SYNC_HORIZON_DAYS: ${SYNC_HORIZON_DAYS:-120}
+      SYNC_INTERVAL_MINUTES: ${SYNC_INTERVAL_MINUTES:-360}
+      NOTIFICATION_INTERVAL_SECONDS: ${NOTIFICATION_INTERVAL_SECONDS:-60}
+      TIMEPAD_ORGANIZATION_IDS: ${TIMEPAD_ORGANIZATION_IDS:-}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+
+  sync:
+    build: ./backend
+    command: ["python", "-m", "events_api.worker"]
+    restart: unless-stopped
+    environment: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+
+  notifications:
+    build: ./backend
+    command: ["python", "-m", "events_api.notification_worker"]
+    restart: unless-stopped
+    environment: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
 
   telegram:
-    build:
-      context: .
-      dockerfile: Dockerfile.bot
-    container_name: telegram-bot
+    build: ./backend
+    command: ["python", "-m", "events_api.bot"]
     restart: unless-stopped
+    profiles: ["telegram"]
     environment:
-      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-      - WEBHOOK_HOST=${WEBHOOK_HOST}
-      - WEBHOOK_PORT=${WEBHOOK_PORT}
-      - WEBHOOK_PATH=${WEBHOOK_PATH}
-      - USE_HTTPS=${USE_HTTPS}
-      - CERT_PATH=${CERT_PATH}
-      - KEY_PATH=${KEY_PATH}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - POSTGRES_URI=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      - MODEL_NAME=${MODEL_NAME}
-      - CACHE_TTL=${CACHE_TTL}
-      - BATCH_SIZE=${BATCH_SIZE}
-      - TOP_K=${TOP_K}
-      - SIMILARITY_THRESHOLD=${SIMILARITY_THRESHOLD}
-      - CLUSTERS_PATH=${CLUSTERS_PATH}
-      - ADMIN_IDS=${ADMIN_IDS}
-      - DELIMETER_PERCENT_ADDED=${DELIMETER_PERCENT_ADDED}
-    volumes:
-      - ./logs:/app/logs
-      - ./data:/app/data
-      - ./certs:/app/certs
-    ports:
-      - "${WEBHOOK_PORT}:${WEBHOOK_PORT}"
+      <<: *app-env
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN:-}
     depends_on:
-      - db
-      - redis
-    networks:
-      - app-network
+      db:
+        condition: service_healthy
+    networks: [internal]
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
 
 volumes:
   postgres_data:
-  redis_data:
 
 networks:
-  app-network:
+  internal:
     driver: bridge
