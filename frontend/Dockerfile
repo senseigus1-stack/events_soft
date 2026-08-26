@@ -1,12 +1,12 @@
 FROM node:24-alpine AS build
 
-ARG VITE_PUBLIC_URL=http://localhost:8080
 ENV CI=true
-ENV VITE_PUBLIC_URL=${VITE_PUBLIC_URL}
 RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
+ARG VITE_PUBLIC_URL=http://localhost:8080
+ENV VITE_PUBLIC_URL=${VITE_PUBLIC_URL}
 COPY . .
 RUN pnpm test
 RUN pnpm build
