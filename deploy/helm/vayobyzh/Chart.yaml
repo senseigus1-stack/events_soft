@@ -1,0 +1,12 @@
+apiVersion: v2
+name: vayobyzh
+description: Production deployment of Vayobyzh and the Kytchi recommendation engine
+type: application
+version: 1.0.3-rc.1
+appVersion: "rc-1.0.3"
+kubeVersion: ">=1.30.0-0"
+home: https://github.com/senseigus1-stack/events_soft
+sources:
+  - https://github.com/senseigus1-stack/events_soft
+maintainers:
+  - name: Vayobyzh maintainers

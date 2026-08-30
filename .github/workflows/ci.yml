@@ -41,3 +41,30 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm build
+
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v4.2.4
+      - name: Lint Helm chart
+        run: helm lint deploy/helm/vayobyzh
+      - name: Render default and single-node manifests
+        run: |
+          helm template vayobyzh deploy/helm/vayobyzh > /tmp/vayobyzh-default.yaml
+          helm template vayobyzh deploy/helm/vayobyzh \
+            -f deploy/kubernetes/values.single-node.yaml \
+            --set-string ingress.host=events.example.com \
+            --set-string certManager.email=admin@example.com \
+            > /tmp/vayobyzh-single-node.yaml
+      - name: Validate Docker Compose configuration
+        env:
+          POSTGRES_PASSWORD: ci-postgres-password
+          APP_SECRET: ci-app-secret-that-is-long-enough
+          SYNC_API_KEY: ci-sync-key
+          ADMIN_API_KEY: ci-admin-key
+          DOMAIN: events.example.com
+          SSL_EMAIL: admin@example.com
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet

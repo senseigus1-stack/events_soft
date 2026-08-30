@@ -1,0 +1,110 @@
+{{- $root := . -}}
+{{- range $component := list "sync" "notifications" "telegram" }}
+{{- $settings := index $root.Values $component }}
+{{- if $settings.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vayobyzh.fullname" $root }}-{{ $component }}
+  labels:
+    {{- include "vayobyzh.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "vayobyzh.selectorLabels" $root | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  template:
+    metadata:
+      labels:
+        {{- include "vayobyzh.selectorLabels" $root | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
+        app.kubernetes.io/part-of: vayobyzh
+      annotations:
+        checksum/config: {{ include (print $root.Template.BasePath "/configmap.yaml") $root | sha256sum }}
+        {{- if $root.Values.secrets.create }}
+        checksum/secret: {{ include (print $root.Template.BasePath "/secret.yaml") $root | sha256sum }}
+        {{- end }}
+        {{- with $root.Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "vayobyzh.serviceAccountName" $root }}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with $root.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: migrate
+          image: {{ include "vayobyzh.apiImage" $root | quote }}
+          imagePullPolicy: {{ $root.Values.images.api.pullPolicy }}
+          command: ["python", "-m", "events_api.migrate"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "vayobyzh.fullname" $root }}-config
+            - secretRef:
+                name: {{ include "vayobyzh.secretName" $root }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: {{ $component }}
+          image: {{ include "vayobyzh.apiImage" $root | quote }}
+          imagePullPolicy: {{ $root.Values.images.api.pullPolicy }}
+          {{- if eq $component "sync" }}
+          command: ["python", "-m", "events_api.worker"]
+          {{- else if eq $component "notifications" }}
+          command: ["python", "-m", "events_api.notification_worker"]
+          {{- else }}
+          command: ["python", "-m", "events_api.bot"]
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "vayobyzh.fullname" $root }}-config
+            - secretRef:
+                name: {{ include "vayobyzh.secretName" $root }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $settings.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 128Mi
+      {{- with $root.Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $root.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $root.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+{{- end }}
+{{- end }}

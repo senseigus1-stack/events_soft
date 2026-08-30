@@ -1,5 +1,28 @@
 name: vayobyzh
 
+x-app-env: &app-env
+  ENVIRONMENT: production
+  RUN_SCHEMA_ON_STARTUP: "false"
+  APP_SECRET: ${APP_SECRET:?Set APP_SECRET in .env}
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-events}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-events}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+  OAUTH_PUBLIC_BASE_URL: ${OAUTH_PUBLIC_BASE_URL:-http://localhost:8080}
+  OAUTH_FRONTEND_URL: ${OAUTH_FRONTEND_URL:-http://localhost:8080}
+  GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID:-}
+  GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
+  YANDEX_OAUTH_CLIENT_ID: ${YANDEX_OAUTH_CLIENT_ID:-}
+  YANDEX_OAUTH_CLIENT_SECRET: ${YANDEX_OAUTH_CLIENT_SECRET:-}
+  GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}
+  GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:-}
+  SYNC_API_KEY: ${SYNC_API_KEY:?Set SYNC_API_KEY in .env}
+  ADMIN_API_KEY: ${ADMIN_API_KEY:?Set ADMIN_API_KEY in .env}
+  SYNC_CITY_SLUGS: ${SYNC_CITY_SLUGS:-msk,spb,ekb,kzn,nsk}
+  SYNC_HORIZON_DAYS: ${SYNC_HORIZON_DAYS:-120}
+  SYNC_INTERVAL_MINUTES: ${SYNC_INTERVAL_MINUTES:-360}
+  NOTIFICATION_INTERVAL_SECONDS: ${NOTIFICATION_INTERVAL_SECONDS:-60}
+  TIMEPAD_ORGANIZATION_IDS: ${TIMEPAD_ORGANIZATION_IDS:-}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
 services:
   db:
     image: postgres:17-alpine
@@ -17,33 +40,23 @@ services:
       retries: 20
     networks: [internal]
 
-  api:
+  migrate:
     build: ./backend
-    restart: unless-stopped
-    environment: &app-env
-      ENVIRONMENT: production
-      APP_SECRET: ${APP_SECRET:?Set APP_SECRET in .env}
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-events}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-events}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
-      OAUTH_PUBLIC_BASE_URL: ${OAUTH_PUBLIC_BASE_URL:-http://localhost:8080}
-      OAUTH_FRONTEND_URL: ${OAUTH_FRONTEND_URL:-http://localhost:8080}
-      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID:-}
-      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
-      YANDEX_OAUTH_CLIENT_ID: ${YANDEX_OAUTH_CLIENT_ID:-}
-      YANDEX_OAUTH_CLIENT_SECRET: ${YANDEX_OAUTH_CLIENT_SECRET:-}
-      GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}
-      GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:-}
-      SYNC_API_KEY: ${SYNC_API_KEY:?Set SYNC_API_KEY in .env}
-      ADMIN_API_KEY: ${ADMIN_API_KEY:?Set ADMIN_API_KEY in .env}
-      SYNC_CITY_SLUGS: ${SYNC_CITY_SLUGS:-msk,spb,ekb,kzn,nsk}
-      SYNC_HORIZON_DAYS: ${SYNC_HORIZON_DAYS:-120}
-      SYNC_INTERVAL_MINUTES: ${SYNC_INTERVAL_MINUTES:-360}
-      NOTIFICATION_INTERVAL_SECONDS: ${NOTIFICATION_INTERVAL_SECONDS:-60}
-      TIMEPAD_ORGANIZATION_IDS: ${TIMEPAD_ORGANIZATION_IDS:-}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    command: ["python", "-m", "events_api.migrate"]
+    restart: "no"
+    environment: *app-env
     depends_on:
       db:
         condition: service_healthy
+    networks: [internal]
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    environment: *app-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
       interval: 10s
@@ -57,8 +70,8 @@ services:
     restart: unless-stopped
     environment: *app-env
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks: [internal]
 
   notifications:
@@ -67,8 +80,8 @@ services:
     restart: unless-stopped
     environment: *app-env
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks: [internal]
 
   telegram:
@@ -80,8 +93,8 @@ services:
       <<: *app-env
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN:-}
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks: [internal]
 
   web:
@@ -91,12 +104,12 @@ services:
         VITE_PUBLIC_URL: ${PUBLIC_SITE_URL:-http://localhost:8080}
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${WEB_PORT:-8080}:80"
+      - "127.0.0.1:${WEB_PORT:-8080}:8080"
     depends_on:
       api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
       interval: 10s
       timeout: 5s
       retries: 10

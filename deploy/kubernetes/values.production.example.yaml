@@ -1,0 +1,47 @@
+# Multi-node/cloud production example. Copy, adjust and pass with -f.
+images:
+  api:
+    # Prefer a digest after the CI build for an immutable rollout.
+    digest: ""
+  web:
+    digest: ""
+
+config:
+  CORS_ORIGINS: https://events.example.com
+  OAUTH_PUBLIC_BASE_URL: https://events.example.com
+  OAUTH_FRONTEND_URL: https://events.example.com
+  SYNC_CITY_SLUGS: all
+
+api:
+  replicas: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+
+web:
+  replicas: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+
+ingress:
+  className: traefik
+  host: events.example.com
+  tls:
+    enabled: true
+    secretName: vayobyzh-tls
+
+certManager:
+  createClusterIssuer: false
+  issuerName: letsencrypt-production
+
+postgresql:
+  enabled: false
+
+backup:
+  enabled: false
+
+networkPolicy:
+  enabled: true

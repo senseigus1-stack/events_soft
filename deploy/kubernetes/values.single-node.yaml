@@ -1,0 +1,35 @@
+api:
+  replicas: 1
+  podDisruptionBudget:
+    enabled: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: "1"
+      memory: 640Mi
+
+web:
+  replicas: 1
+  podDisruptionBudget:
+    enabled: false
+
+ingress:
+  className: traefik
+
+certManager:
+  createClusterIssuer: true
+
+postgresql:
+  enabled: true
+  storageClass: local-path
+  storage: 30Gi
+
+backup:
+  enabled: true
+  storageClass: local-path
+  storage: 20Gi
+
+networkPolicy:
+  enabled: true

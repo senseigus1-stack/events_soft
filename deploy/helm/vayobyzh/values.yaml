@@ -1,0 +1,154 @@
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+images:
+  api:
+    repository: ghcr.io/senseigus1-stack/events_soft-api
+    tag: rc-1.0.3
+    digest: ""
+    pullPolicy: IfNotPresent
+  web:
+    repository: ghcr.io/senseigus1-stack/events_soft-web
+    tag: rc-1.0.3
+    digest: ""
+    pullPolicy: IfNotPresent
+
+config:
+  ENVIRONMENT: production
+  RUN_SCHEMA_ON_STARTUP: "false"
+  CORS_ORIGINS: https://events.example.com
+  OAUTH_PUBLIC_BASE_URL: https://events.example.com
+  OAUTH_FRONTEND_URL: https://events.example.com
+  SYNC_CITY_SLUGS: msk,spb,ekb,kzn,nsk
+  SYNC_HORIZON_DAYS: "120"
+  SYNC_INTERVAL_MINUTES: "360"
+  NOTIFICATION_INTERVAL_SECONDS: "60"
+  TIMEPAD_ORGANIZATION_IDS: ""
+  LOG_LEVEL: INFO
+
+# Keep production secrets outside values and Helm release history. Create this
+# Secret with deploy/kubernetes/create-secret.sh or an external-secrets operator.
+secrets:
+  create: false
+  existingSecret: vayobyzh-secrets
+  data: {}
+
+api:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 150m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+web:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 192Mi
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+sync:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 192Mi
+    limits:
+      cpu: 600m
+      memory: 512Mi
+
+notifications:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
+
+telegram:
+  enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 384Mi
+
+ingress:
+  enabled: true
+  className: traefik
+  host: events.example.com
+  annotations: {}
+  tls:
+    enabled: true
+    secretName: vayobyzh-tls
+
+certManager:
+  # Enable only if cert-manager is already installed cluster-wide.
+  createClusterIssuer: false
+  issuerName: letsencrypt-production
+  email: admin@example.com
+  server: https://acme-v02.api.letsencrypt.org/directory
+
+postgresql:
+  # A managed external PostgreSQL with backups and HA is recommended for prod.
+  # Set true for a single-node installation and provide POSTGRES_* plus a matching
+  # DATABASE_URL in the application Secret.
+  enabled: false
+  image:
+    repository: postgres
+    tag: 17-alpine
+    pullPolicy: IfNotPresent
+  storageClass: ""
+  storage: 20Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+backup:
+  enabled: false
+  schedule: "17 2 * * *"
+  retentionDays: 14
+  storageClass: ""
+  storage: 20Gi
+
+networkPolicy:
+  enabled: true
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

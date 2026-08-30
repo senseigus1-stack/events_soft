@@ -16,7 +16,8 @@ async def lifespan(_: FastAPI):
         level=settings.log_level,
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
-    create_schema()
+    if settings.run_schema_on_startup:
+        create_schema()
     yield
 
 
@@ -25,7 +26,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Ваёбыж API",
         description="Городские события, сообщества и персональные рекомендации Кытчи без ярлыков людей.",
-        version="1.0.1-rc",
+        version="1.0.3-rc",
         lifespan=lifespan,
         docs_url="/docs" if settings.environment != "production" else None,
         redoc_url=None,

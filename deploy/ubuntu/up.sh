@@ -8,6 +8,10 @@ if [[ ! -f .env ]]; then
   echo "Missing .env. Copy .env.production.example to .env and fill it in."
   exit 1
 fi
+if grep -q 'CHANGE_ME' .env; then
+  echo "Replace every CHANGE_ME value in .env before production startup."
+  exit 1
+fi
 
 docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --remove-orphans

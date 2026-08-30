@@ -1,0 +1,77 @@
+{{- if and .Values.postgresql.enabled .Values.backup.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "vayobyzh.fullname" . }}-backups
+  labels:
+    {{- include "vayobyzh.labels" . | nindent 4 }}
+spec:
+  accessModes: ["ReadWriteOnce"]
+  {{- if .Values.backup.storageClass }}
+  storageClassName: {{ .Values.backup.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.backup.storage }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "vayobyzh.fullname" . }}-backup
+  labels:
+    {{- include "vayobyzh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            {{- include "vayobyzh.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup
+            app.kubernetes.io/part-of: vayobyzh
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: OnFailure
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: pg-dump
+              image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+              imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+              envFrom:
+                - secretRef:
+                    name: {{ include "vayobyzh.secretName" . }}
+              command:
+                - sh
+                - -ec
+                - >-
+                  timestamp=$(date -u +%Y%m%dT%H%M%SZ);
+                  PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc -f "/backups/vayobyzh-${timestamp}.dump";
+                  find /backups -type f -name 'vayobyzh-*.dump' -mtime +{{ .Values.backup.retentionDays }} -delete
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: {{ include "vayobyzh.fullname" . }}-backups
+{{- end }}

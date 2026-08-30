@@ -1,4 +1,4 @@
-# Ваёбыж · rc-1.0.1
+# Ваёбыж · rc-1.0.3
 
 «Ваёбыж» — городская система событий, планов, друзей и обсуждений. «Кытчи» — её персональная технология подбора мероприятий.
 
@@ -53,7 +53,9 @@ PostgreSQL ◀── sync worker ◀── KudaGo / Timepad
 - `backend/events_api/` — API, модели, Кытчи, провайдеры, workers и Telegram;
 - `backend/tests/` — проверки рекомендаций и продуктовых API;
 - `docker-compose.yml` — PostgreSQL, API, синхронизация, напоминания, Nginx и опциональный Telegram;
-- `docker-compose.prod.yml` и `deploy/` — автоматический HTTPS через Caddy и запуск на Ubuntu.
+- `docker-compose.prod.yml` — автоматический HTTPS через Caddy на одном сервере;
+- `deploy/helm/vayobyzh` — Kubernetes chart с миграциями, TLS, probes, NetworkPolicy, PDB/HPA и workers;
+- `deploy/kubernetes` — воспроизводимая установка K3s/Helm и атомарный production rollout.
 
 ## Production-запуск
 
@@ -73,6 +75,8 @@ cp .env.production.example .env
 ```
 
 Полная инструкция, требования к серверу, systemd, обновления и резервные копии: [docs/UBUNTU_DEPLOY.md](docs/UBUNTU_DEPLOY.md).
+
+Kubernetes/K3s, внешний PostgreSQL, GHCR, TLS, rollback и HA: [docs/KUBERNETES_DEPLOY.md](docs/KUBERNETES_DEPLOY.md).
 
 API закрывает пользовательские записи подписанным bearer-токеном, административную модерацию — отдельным `X-Admin-Key`, внутреннюю проверку синхронизации — `X-Sync-Key`. Пароли Google, Яндекса и GitHub никогда не проходят через Ваёбыж, а access-токены провайдеров не сохраняются.
 

@@ -1,0 +1,121 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "vayobyzh.fullname" . }}-web
+  labels:
+    {{- include "vayobyzh.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "vayobyzh.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: web
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    # Ingress controllers usually run in another namespace. The application
+    # service remains ClusterIP-only, so only cluster workloads can use this rule.
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "vayobyzh.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: api
+      ports:
+        - protocol: TCP
+          port: 8000
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "vayobyzh.fullname" . }}-api
+  labels:
+    {{- include "vayobyzh.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "vayobyzh.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "vayobyzh.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: web
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "vayobyzh.fullname" . }}-application-egress
+  labels:
+    {{- include "vayobyzh.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values: ["api", "sync", "notifications", "telegram", "backup"]
+  policyTypes: ["Egress"]
+  egress:
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "vayobyzh.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+        - ipBlock:
+            cidr: ::/0
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+---
+{{- if .Values.postgresql.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "vayobyzh.fullname" . }}-postgresql
+  labels:
+    {{- include "vayobyzh.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "vayobyzh.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgresql
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: vayobyzh
+      ports:
+        - protocol: TCP
+          port: 5432
+{{- end }}
+{{- end }}

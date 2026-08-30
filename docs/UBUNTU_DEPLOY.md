@@ -18,7 +18,7 @@
 ```bash
 sudo mkdir -p /opt/vayobyzh
 sudo chown "$USER":"$USER" /opt/vayobyzh
-git clone --branch rc-1.0.1 https://github.com/senseigus1-stack/events_soft.git /opt/vayobyzh
+git clone --branch rc-1.0.3 https://github.com/senseigus1-stack/events_soft.git /opt/vayobyzh
 cd /opt/vayobyzh
 sudo ./deploy/ubuntu/install-docker.sh
 sudo usermod -aG docker "$USER"
@@ -33,6 +33,8 @@ nano .env
 chmod 600 .env
 ./deploy/ubuntu/up.sh
 ```
+
+Перед API запускается одноразовый контейнер `migrate`, который применяет Alembic-миграции. API и workers стартуют только после успешной миграции; web и API работают без root-пользователя.
 
 Все секреты с `CHANGE_ME` нужно заменить. Быстрый способ создать каждый секрет:
 
@@ -81,3 +83,5 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
 ```
 
 Ожидается HTTP 200 и состояние `healthy` у `db`, `api` и `web`. Логи: `docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f --tail=200`.
+
+Для Kubernetes, одноузлового K3s и HA-схемы используйте [KUBERNETES_DEPLOY.md](KUBERNETES_DEPLOY.md).
