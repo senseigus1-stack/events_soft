@@ -1,12 +1,28 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from .models import Attendance, City, Event, Friendship, Interaction, User, UserInterest
-from .recommender import Candidate, HistoryItem, rank_candidates
+from .recommender import (
+    Candidate,
+    HistoryItem,
+    RankedCandidate,
+    build_preference_profile,
+    rank_candidates,
+)
+
+
+@dataclass(frozen=True)
+class RecommendationBatch:
+    items: list[tuple[Event, RankedCandidate]]
+    signal_count: int
+    confidence: float
+    stage: str
+    profile_summary: list[str]
 
 
 def ensure_user(session: Session, user_id: str) -> User:
@@ -63,7 +79,7 @@ def recommendations(
     city: str | None,
     limit: int,
     now: datetime | None = None,
-) -> list[tuple[Event, float, list[str]]]:
+) -> RecommendationBatch:
     now = now or datetime.now(timezone.utc)
     user = session.scalar(
         select(User).options(selectinload(User.interests)).where(User.id == user_id)
@@ -89,7 +105,9 @@ def recommendations(
         )
     )
     excluded_event_ids = {
-        item.event_id for item in interactions if item.action in {"dismiss", "attend"}
+        item.event_id
+        for item in interactions
+        if item.action in {"dismiss", "save", "attend"}
     }
     friend_rows = list(
         session.scalars(
@@ -125,6 +143,9 @@ def recommendations(
             occurred_at=item.created_at,
             category=item.event.category,
             tags=tuple(item.event.tags),
+            venue_name=item.event.venue_name,
+            starts_at=item.event.starts_at,
+            is_free=item.event.is_free,
         )
         for item in interactions
     ]
@@ -145,8 +166,15 @@ def recommendations(
         if event.id not in excluded_event_ids
     ]
     ranked = rank_candidates(candidates, explicit, history, now=now, limit=limit)
+    profile = build_preference_profile(explicit, history, now)
     by_id = {event.id: event for event in events}
-    return [(by_id[item.candidate.id], item.score, item.reasons) for item in ranked]
+    return RecommendationBatch(
+        items=[(by_id[item.candidate.id], item) for item in ranked],
+        signal_count=profile.signal_count,
+        confidence=profile.confidence,
+        stage=profile.stage,
+        profile_summary=profile.summary,
+    )
 
 
 def replace_interests(session: Session, user_id: str, tags: list[str]) -> User:

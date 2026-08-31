@@ -28,7 +28,7 @@ GitHub Actions собирает два образа при push в `rc-*`. Пе�
 ```bash
 sudo mkdir -p /opt/vayobyzh
 sudo chown "$USER":"$USER" /opt/vayobyzh
-git clone --branch rc-1.0.3 https://github.com/senseigus1-stack/events_soft.git /opt/vayobyzh
+git clone --branch rc-1.1.0 https://github.com/senseigus1-stack/events_soft.git /opt/vayobyzh
 cd /opt/vayobyzh
 sudo ./deploy/kubernetes/install-k3s.sh
 ```
@@ -81,8 +81,8 @@ ClusterIssuer может быть общим для всего кластера.
 
 ```bash
 cd /opt/vayobyzh
-git pull --ff-only origin rc-1.0.3
-VAYOBYZH_IMAGE_TAG=rc-1.0.3 ./deploy/kubernetes/deploy.sh
+git pull --ff-only origin rc-1.1.0
+VAYOBYZH_IMAGE_TAG=rc-1.1.0 ./deploy/kubernetes/deploy.sh
 kubectl rollout status deployment -n vayobyzh --timeout=10m
 ```
 
@@ -123,6 +123,7 @@ PVC не является внешним backup. Настройте снапшо
 - GitHub Actions зелёный, образы привязаны к digest и packages доступны кластеру;
 - секреты переданы через Secret/external-secrets, `.env.kubernetes` имеет mode 600 и не закоммичен;
 - OAuth callback URL совпадают с `https://DOMAIN/api/v1/auth/oauth/.../callback`;
+- при включённом Telegram заполнен `TELEGRAM_TOKEN`, pod `telegram` готов, а `/profile` показывает стадию обучения;
 - TLS `Ready=True`, HTTP перенаправляется на HTTPS, DNS не содержит старых адресов;
 - внешний PostgreSQL имеет TLS, PITR и проверенное восстановление;
 - есть метрики узлов/pods, централизованные логи и алерты на 5xx, restarts, заполнение диска и срок сертификата;

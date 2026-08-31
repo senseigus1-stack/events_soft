@@ -18,7 +18,7 @@
 ```bash
 sudo mkdir -p /opt/vayobyzh
 sudo chown "$USER":"$USER" /opt/vayobyzh
-git clone --branch rc-1.0.3 https://github.com/senseigus1-stack/events_soft.git /opt/vayobyzh
+git clone --branch rc-1.1.0 https://github.com/senseigus1-stack/events_soft.git /opt/vayobyzh
 cd /opt/vayobyzh
 sudo ./deploy/ubuntu/install-docker.sh
 sudo usermod -aG docker "$USER"
@@ -61,6 +61,12 @@ Caddy автоматически получает и продлевает TLS-с
 Создайте OAuth-приложения в кабинетах Google, Яндекс ID и GitHub. Для каждого включённого сервиса добавьте точный callback URL из `.env.production.example` и заполните пару `CLIENT_ID` / `CLIENT_SECRET`. Пустая пара безопасно отключает кнопку провайдера.
 
 Ваёбыж не получает пароль пользователя. OAuth использует одноразовый `state`, PKCE и минимальные профильные права, а токены провайдеров не сохраняются в базе.
+
+## Telegram-бот
+
+Создайте бота через BotFather и укажите `TELEGRAM_TOKEN` в `.env`. `deploy/ubuntu/up.sh` обнаружит токен и автоматически включит сервис `telegram`. Если значение пустое, остальной production-стек продолжит работать без бота.
+
+После запуска откройте бота и проверьте `/start`, `/interests`, `/recommend`, `/saved` и `/profile`. Логи доступны через `docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile telegram logs -f telegram`.
 
 ## Обновление, остановка и backup
 

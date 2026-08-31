@@ -1,6 +1,6 @@
 import type {
   City, DiscussionSpace, EventItem, EventSubmission, Friend, NotificationItem,
-  OAuthProvider, Plan, Profile,
+  OAuthProvider, Plan, Profile, RecommendationFeed,
 } from "./types";
 
 const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
@@ -67,8 +67,7 @@ export async function fetchEvents(city: string) {
 }
 
 export async function fetchRecommendations(userId: string, city: string) {
-  const result = await request<{ items: EventItem[] }>(`/api/v1/users/${encodeURIComponent(userId)}/recommendations?city=${encodeURIComponent(city)}&limit=24`);
-  return result.items;
+  return request<RecommendationFeed>(`/api/v1/users/${encodeURIComponent(userId)}/recommendations?city=${encodeURIComponent(city)}&limit=24`);
 }
 
 export const saveInterests = (userId: string, tags: string[]) => request<void>(`/api/v1/users/${encodeURIComponent(userId)}/interests`, { method: "PUT", body: JSON.stringify({ tags }) });

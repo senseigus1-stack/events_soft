@@ -1,6 +1,6 @@
 FROM node:24-alpine AS build
 
-ARG RELEASE_VERSION=rc-1.0.3
+ARG RELEASE_VERSION=rc-1.1.0
 ARG VCS_REF=unknown
 
 ENV CI=true
@@ -16,7 +16,7 @@ RUN pnpm build
 
 FROM nginx:1.29-alpine
 
-ARG RELEASE_VERSION=rc-1.0.3
+ARG RELEASE_VERSION=rc-1.1.0
 ARG VCS_REF=unknown
 
 LABEL org.opencontainers.image.title="Vayobyzh Web" \

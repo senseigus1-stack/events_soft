@@ -5,7 +5,7 @@ repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 env_file="${VAYOBYZH_ENV_FILE:-${repo_dir}/.env.kubernetes}"
 namespace="${VAYOBYZH_NAMESPACE:-vayobyzh}"
 release="${VAYOBYZH_RELEASE:-vayobyzh}"
-image_tag="${VAYOBYZH_IMAGE_TAG:-rc-1.0.3}"
+image_tag="${VAYOBYZH_IMAGE_TAG:-rc-1.1.0}"
 cert_manager_version="${CERT_MANAGER_VERSION:-v1.21.1}"
 
 read_env() {
@@ -26,12 +26,18 @@ fi
 
 domain="$(read_env DOMAIN)"
 tls_email="$(read_env TLS_EMAIL)"
+telegram_token="$(read_env TELEGRAM_TOKEN)"
 if [[ -z "${domain}" || -z "${tls_email}" ]]; then
   echo "DOMAIN and TLS_EMAIL are required in ${env_file}."
   exit 1
 fi
 
 "${repo_dir}/deploy/kubernetes/create-secret.sh" "${env_file}"
+
+telegram_args=(--set telegram.enabled=false)
+if [[ -n "${telegram_token}" ]]; then
+  telegram_args=(--set telegram.enabled=true)
+fi
 
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
   --version "${cert_manager_version}" \
@@ -53,6 +59,8 @@ helm upgrade --install "${release}" "${repo_dir}/deploy/helm/vayobyzh" \
   --set-string config.CORS_ORIGINS="https://${domain}" \
   --set-string config.OAUTH_PUBLIC_BASE_URL="https://${domain}" \
   --set-string config.OAUTH_FRONTEND_URL="https://${domain}" \
+  --set-string config.PUBLIC_SITE_URL="https://${domain}" \
+  "${telegram_args[@]}" \
   --atomic \
   --timeout 15m
 

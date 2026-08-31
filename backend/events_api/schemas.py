@@ -76,12 +76,18 @@ class InteractionWrite(BaseModel):
 
 class RecommendationRead(EventRead):
     score: float
+    match_percent: int = Field(ge=0, le=100)
     reasons: list[str]
+    score_components: dict[str, float]
 
 
 class RecommendationList(BaseModel):
     items: list[RecommendationRead]
-    strategy: str = "kytchi-v1"
+    strategy: str = "kytchi-ai-v2"
+    learning_stage: Literal["exploring", "learning", "personalized"]
+    signal_count: int = Field(ge=0)
+    confidence: float = Field(ge=0, le=1)
+    profile_summary: list[str] = Field(default_factory=list)
 
 
 class ProfileWrite(BaseModel):

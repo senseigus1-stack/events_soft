@@ -1,6 +1,12 @@
 from datetime import datetime, timedelta, timezone
 
-from events_api.recommender import Candidate, HistoryItem, build_preference_weights, rank_candidates
+from events_api.recommender import (
+    Candidate,
+    HistoryItem,
+    build_preference_profile,
+    build_preference_weights,
+    rank_candidates,
+)
 
 
 NOW = datetime(2026, 8, 25, 12, tzinfo=timezone.utc)
@@ -86,3 +92,46 @@ def test_friends_attendance_is_explained_and_boosted():
 
     assert ranked[0].candidate.id == 1
     assert any("друг" in reason for reason in ranked[0].reasons)
+
+
+def test_context_model_learns_time_price_and_venue():
+    history = [
+        HistoryItem(
+            "attend",
+            NOW - timedelta(days=2),
+            "Музыка",
+            ("Музыка",),
+            venue_name="ГЭС-2",
+            starts_at=NOW.replace(hour=20),
+            is_free=True,
+        ),
+        HistoryItem(
+            "save",
+            NOW - timedelta(days=4),
+            "Выставки",
+            ("Искусство",),
+            venue_name="ГЭС-2",
+            starts_at=NOW.replace(hour=19),
+            is_free=True,
+        ),
+    ]
+    profile = build_preference_profile([], history, NOW)
+
+    assert profile.time_weights["evening"] > 0
+    assert profile.venue_weights["гэс-2"] > 0
+    assert profile.free_weight > 0
+    assert profile.stage == "exploring"
+
+
+def test_ranking_returns_explainable_match_score():
+    ranked = rank_candidates(
+        [candidate(1, "Музыка")],
+        ["Музыка"],
+        [],
+        now=NOW,
+    )[0]
+
+    assert 60 <= ranked.match_percent <= 99
+    assert set(ranked.score_components) == {
+        "taste", "context", "social", "timing", "discovery"
+    }

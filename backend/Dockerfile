@@ -1,6 +1,6 @@
 FROM python:3.12-slim AS runtime
 
-ARG RELEASE_VERSION=rc-1.0.3
+ARG RELEASE_VERSION=rc-1.1.0
 ARG VCS_REF=unknown
 
 LABEL org.opencontainers.image.title="Vayobyzh API" \

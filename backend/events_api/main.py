@@ -25,8 +25,8 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
         title="Ваёбыж API",
-        description="Городские события, сообщества и персональные рекомендации Кытчи без ярлыков людей.",
-        version="1.0.3-rc",
+        description="Городские события, сообщества и адаптивные AI-рекомендации Кытчи без ярлыков людей.",
+        version="1.1.0-rc",
         lifespan=lifespan,
         docs_url="/docs" if settings.environment != "production" else None,
         redoc_url=None,

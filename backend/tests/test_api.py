@@ -78,7 +78,11 @@ def test_interests_influence_recommendations():
         response = client.get("/api/v1/users/u1/recommendations", params={"city": "msk"})
         assert response.status_code == 200
         assert response.json()["items"][0]["category"] == "Театр"
-        assert response.json()["strategy"] == "kytchi-v1"
+        assert response.json()["strategy"] == "kytchi-ai-v2"
+        assert response.json()["signal_count"] == 1
+        assert response.json()["learning_stage"] == "exploring"
+        assert response.json()["items"][0]["match_percent"] >= 60
+        assert "taste" in response.json()["items"][0]["score_components"]
     finally:
         session.close()
 

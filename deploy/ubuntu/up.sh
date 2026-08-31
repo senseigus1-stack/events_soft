@@ -13,6 +13,12 @@ if grep -q 'CHANGE_ME' .env; then
   exit 1
 fi
 
-docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --remove-orphans
-docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
+compose_args=(-f docker-compose.yml -f docker-compose.prod.yml)
+telegram_token="$(awk -F= '$1 == "TELEGRAM_TOKEN" {sub(/^[^=]*=/, ""); value=$0} END {gsub(/\r$/, "", value); print value}' .env)"
+if [[ -n "${telegram_token}" ]]; then
+  compose_args+=(--profile telegram)
+fi
+
+docker compose "${compose_args[@]}" config --quiet
+docker compose "${compose_args[@]}" up -d --build --remove-orphans
+docker compose "${compose_args[@]}" ps

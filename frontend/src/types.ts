@@ -26,7 +26,24 @@ export type EventItem = {
   popularity: number;
   status?: string;
   score?: number;
+  match_percent?: number;
   reasons?: string[];
+  score_components?: {
+    taste: number;
+    context: number;
+    social: number;
+    timing: number;
+    discovery: number;
+  };
+};
+
+export type RecommendationFeed = {
+  items: EventItem[];
+  strategy: "kytchi-ai-v2";
+  learning_stage: "exploring" | "learning" | "personalized";
+  signal_count: number;
+  confidence: number;
+  profile_summary: string[];
 };
 
 export type DateFilter = "any" | "today" | "weekend" | "week";

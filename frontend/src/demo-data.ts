@@ -22,6 +22,7 @@ export const createDemoEvents = (): EventItem[] => [
     category: "Музыка", tags: ["Музыка", "На улице", "Вечером"], starts_at: futureIso(0, 20), ends_at: futureIso(0, 22),
     venue_name: "Хлебозавод №9", address: "Новодмитровская улица, 1", latitude: null, longitude: null, image_url: "",
     event_url: "https://kudago.com/msk/", price_text: "от 1 200 ₽", is_free: false, age_min: 12, popularity: 485,
+    score: .91, match_percent: 93,
     reasons: ["Совпадает с интересом «музыка»", "Популярно у зрителей"],
   },
   {
@@ -30,6 +31,7 @@ export const createDemoEvents = (): EventItem[] => [
     category: "Выставки", tags: ["Выставки", "Архитектура", "Искусство"], starts_at: futureIso(1, 10), ends_at: futureIso(18, 21),
     venue_name: "Музей Москвы", address: "Зубовский бульвар, 2", latitude: null, longitude: null, image_url: "",
     event_url: "https://kudago.com/msk/", price_text: "600 ₽", is_free: false, age_min: 6, popularity: 361,
+    score: .84, match_percent: 87,
     reasons: ["Совпадает с интересом «искусство»"],
   },
   {
@@ -38,6 +40,7 @@ export const createDemoEvents = (): EventItem[] => [
     category: "Лекции", tags: ["Лекции", "Город", "Архитектура"], starts_at: futureIso(2, 19), ends_at: futureIso(2, 21),
     venue_name: "Дом культуры ГЭС-2", address: "Болотная набережная, 15", latitude: null, longitude: null, image_url: "",
     event_url: "https://kudago.com/msk/", price_text: "Бесплатно по регистрации", is_free: true, age_min: 16, popularity: 294,
+    score: .78, match_percent: 81,
     reasons: ["Новый вариант для разнообразия"],
   },
   {
@@ -46,6 +49,7 @@ export const createDemoEvents = (): EventItem[] => [
     category: "Кино", tags: ["Кино", "Фестиваль", "Вечером"], starts_at: futureIso(4, 18), ends_at: futureIso(4, 22),
     venue_name: "Иллюзион", address: "Котельническая набережная, 1/15", latitude: null, longitude: null, image_url: "",
     event_url: "https://kudago.com/msk/", price_text: "800 ₽", is_free: false, age_min: 18, popularity: 233,
+    score: .71, match_percent: 76, reasons: ["Подходит под ваш вечерний ритм"],
   },
   {
     id: 105, source: "demo", city_slug: "msk", title: "Маркет локальных издательств",
@@ -53,6 +57,7 @@ export const createDemoEvents = (): EventItem[] => [
     category: "Фестивали", tags: ["Книги", "Маркет", "Искусство"], starts_at: futureIso(5, 12), ends_at: futureIso(5, 20),
     venue_name: "ДК Рассвет", address: "Столярный переулок, 3", latitude: null, longitude: null, image_url: "",
     event_url: "https://kudago.com/msk/", price_text: "Вход свободный", is_free: true, age_min: 0, popularity: 186,
+    score: .68, match_percent: 73, reasons: ["Вы часто выбираете бесплатные события"],
   },
   {
     id: 106, source: "demo", city_slug: "msk", title: "Импровизация: новый состав",
@@ -60,6 +65,6 @@ export const createDemoEvents = (): EventItem[] => [
     category: "Театр", tags: ["Театр", "Юмор", "Импровизация"], starts_at: futureIso(7, 20), ends_at: futureIso(7, 22),
     venue_name: "Практика", address: "Большой Козихинский переулок, 30", latitude: null, longitude: null, image_url: "",
     event_url: "https://kudago.com/msk/", price_text: "от 1 500 ₽", is_free: false, age_min: 16, popularity: 412,
+    score: .64, match_percent: 69, reasons: ["Кытчи проверяет новый для вас сценарий"],
   },
 ];
-

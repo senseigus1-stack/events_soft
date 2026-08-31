@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         default_factory=lambda: ["http://localhost:5173"]
     )
     public_api_url: str = "http://localhost:8000"
+    public_site_url: str = "http://localhost:8080"
     app_secret: str = ""
     auth_token_days: int = Field(default=365, ge=1, le=3650)
     oauth_public_base_url: str = "http://localhost:8000"

@@ -223,16 +223,22 @@ def recommended(
     limit: int = Query(default=12, ge=1, le=50),
     session: Session = Depends(get_session),
 ) -> RecommendationList:
-    items = recommendations(session, user_id, city=city, limit=limit)
+    batch = recommendations(session, user_id, city=city, limit=limit)
     return RecommendationList(
         items=[
             RecommendationRead(
                 **EventRead.model_validate(event).model_dump(),
-                score=score,
-                reasons=reasons,
+                score=ranked.score,
+                match_percent=ranked.match_percent,
+                reasons=ranked.reasons,
+                score_components=ranked.score_components,
             )
-            for event, score, reasons in items
-        ]
+            for event, ranked in batch.items
+        ],
+        learning_stage=batch.stage,
+        signal_count=batch.signal_count,
+        confidence=batch.confidence,
+        profile_summary=batch.profile_summary,
     )
 
 

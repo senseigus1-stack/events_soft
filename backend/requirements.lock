@@ -1,4 +1,4 @@
-# Runtime dependency lock for rc-1.0.3. Regenerate only after tests and image QA.
+# Runtime dependency lock for rc-1.1.0. Regenerate only after tests and image QA.
 aiofiles==25.1.0
 aiogram==3.31.0
 aiohappyeyeballs==2.7.1

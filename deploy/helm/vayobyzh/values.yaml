@@ -8,12 +8,12 @@ serviceAccount:
 images:
   api:
     repository: ghcr.io/senseigus1-stack/events_soft-api
-    tag: rc-1.0.3
+    tag: rc-1.1.0
     digest: ""
     pullPolicy: IfNotPresent
   web:
     repository: ghcr.io/senseigus1-stack/events_soft-web
-    tag: rc-1.0.3
+    tag: rc-1.1.0
     digest: ""
     pullPolicy: IfNotPresent
 
@@ -23,6 +23,7 @@ config:
   CORS_ORIGINS: https://events.example.com
   OAUTH_PUBLIC_BASE_URL: https://events.example.com
   OAUTH_FRONTEND_URL: https://events.example.com
+  PUBLIC_SITE_URL: https://events.example.com
   SYNC_CITY_SLUGS: msk,spb,ekb,kzn,nsk
   SYNC_HORIZON_DAYS: "120"
   SYNC_INTERVAL_MINUTES: "360"

@@ -10,6 +10,7 @@ config:
   CORS_ORIGINS: https://events.example.com
   OAUTH_PUBLIC_BASE_URL: https://events.example.com
   OAUTH_FRONTEND_URL: https://events.example.com
+  PUBLIC_SITE_URL: https://events.example.com
   SYNC_CITY_SLUGS: all
 
 api:
